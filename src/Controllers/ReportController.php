@@ -157,7 +157,9 @@ final class ReportController
             $update->execute(['nickname' => 'Katılımcı ' . ($idx + 1), 'id' => $p['id']]);
         }
 
-        header('Location: ' . eduqr_path('/admin/sessions/' . $sessionId . '/report?anonymized=1'));
+        $this->sessionRepo->setAnonymized($sessionId);
+
+        header('Location: ' . eduqr_path('/admin/sessions/' . $sessionId . '/report'));
         exit;
     }
 

@@ -199,6 +199,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         const shortCode = <?= json_encode($session['short_code']) ?>;
         const apiPath = <?= json_encode(eduqr_path('/api/v1/sessions/')) ?>;
         const answerPath = <?= json_encode(eduqr_path('/api/v1/answers')) ?>;
+        const locale = <?= json_encode($locale) ?>;
 
         // Localized JS variables
         const translationSubmitFailed = <?= json_encode(t('student.wait.submit_failed')) ?>;

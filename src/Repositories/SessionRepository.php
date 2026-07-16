@@ -64,4 +64,10 @@ final class SessionRepository
             'id'     => $id,
         ]);
     }
+
+    public function setAnonymized(int $id): void
+    {
+        $stmt = $this->db->prepare("UPDATE sessions SET is_anonymized = 1 WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+    }
 }

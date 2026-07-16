@@ -464,7 +464,14 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                     <div class="d-flex flex-wrap gap-3">
                         <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report') ?>" class="btn btn-custom-primary"><?= htmlspecialchars(t('admin.session.view_report_pdf')) ?></a>
                         <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report/csv') ?>" class="btn btn-custom-outline"><?= htmlspecialchars(t('admin.session.download_report_csv')) ?></a>
+                        <?php if ($session['status'] !== 'closed'): ?>
+                        <form id="close-session-form"
+                              action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/close') ?>"
+                              method="POST"
+                              style="display:none;">
+                        </form>
                         <button class="btn btn-logout ms-md-auto" onclick="confirmCloseSession(event)"><?= htmlspecialchars(t('admin.session.close_session')) ?></button>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
@@ -528,7 +535,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                                         </div>
 
                                         <div class="d-flex gap-2">
-                                            <?php if ($q['status'] !== 'active' && $q['status'] !== 'closed'): ?>
+                                            <?php if ($q['status'] !== 'active'): ?>
                                                 <form action="<?= eduqr_path('/admin/questions/' . (int)$q['id'] . '/activate') ?>" method="POST">
                                                     <button type="submit" class="btn btn-sm btn-success py-2 px-3 rounded-3"><?= htmlspecialchars(t('admin.session.publish')) ?></button>
                                                 </form>
@@ -807,12 +814,11 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         }
 
         function confirmCloseSession(e) {
+            e.preventDefault();
             if (!confirm(translationCloseWarning)) {
-                e.preventDefault();
                 return false;
             }
-            // Trigger close session action (submit form or post request)
-            window.location.href = <?= json_encode(eduqr_path('/admin/dashboard')) ?>; // close session logic fallback
+            document.getElementById('close-session-form').submit();
         }
 
         function escapeHtml(str) {

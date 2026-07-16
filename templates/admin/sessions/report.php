@@ -482,11 +482,13 @@ $participationRate = $totalPossibleAnswers > 0
             <h5><?= $locale === 'en' ? 'Actions' : 'İşlemler' ?></h5>
             <div class="d-flex flex-wrap gap-2">
                 <!-- Anonymize Session Form -->
+                <?php if (!$session['is_anonymized']): ?>
                 <form action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/anonymize') ?>" method="POST" onsubmit="return confirm('<?= $locale === 'en' ? 'Are you sure you want to permanently anonymize this session\'s participants?' : 'Bu oturumdaki tüm katılımcı isimlerini kalıcı olarak anonimleştirmek istediğinize emin misiniz?' ?>');">
                     <button type="submit" class="btn-anonymize-session">
                         <?= $locale === 'en' ? 'Anonymize Session' : 'Oturumu Anonimleştir' ?>
                     </button>
                 </form>
+                <?php endif; ?>
 
                 <!-- Delete Session Form -->
                 <form action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/delete') ?>" method="POST" onsubmit="return confirm('<?= $locale === 'en' ? 'Are you sure you want to permanently delete this session and all its data?' : 'Bu oturumu ve tüm verilerini kalıcı olarak silmek istediğinize emin misiniz?' ?>');">

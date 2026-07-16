@@ -195,4 +195,31 @@ final class SessionController
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
+    public function close(array $params): void
+    {
+        $user = AuthService::user();
+        if ($user === null) {
+            http_response_code(403);
+            exit;
+        }
+
+        $sessionId = (int) $params['id'];
+        $session = $this->sessionRepo->findById($sessionId);
+        if ($session === null) {
+            http_response_code(404);
+            exit;
+        }
+
+        $course = $this->courseRepo->findByIdAndUserId((int)$session['course_id'], $user['id']);
+        if ($course === null) {
+            http_response_code(403);
+            exit;
+        }
+
+        $this->sessionRepo->updateStatus($sessionId, 'closed');
+
+        header('Location: ' . eduqr_path('/admin/dashboard'));
+        exit;
+    }
 }
