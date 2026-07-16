@@ -376,6 +376,24 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         .text-muted {
             color: var(--text-muted) !important;
         }
+
+        /* ── File Upload Drop Zone ──────────────────────────────── */
+        .file-drop-zone {
+            border: 2px dashed var(--input-border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--input-bg);
+            position: relative;
+        }
+        .file-drop-zone:hover, .file-drop-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.04);
+        }
+        .file-drop-icon { font-size: 2rem; margin-bottom: 6px; }
+        .file-drop-text { font-size: 0.85rem; color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -636,15 +654,32 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 </div>
                 <div class="modal-body">
                     <p class="text-muted small mb-3"><?= htmlspecialchars(t('admin.session.import_instructions')) ?></p>
-                    <textarea id="import-json" class="form-control font-monospace small" rows="10" placeholder='{
+                    
+                    <!-- File Upload Option -->
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Option A: Upload JSON File' : 'Seçenek A: JSON Dosyası Yükle' ?></label>
+                        <div class="file-drop-zone" id="modal-file-drop-zone">
+                            <input type="file" id="modal-json-file" accept=".json" style="display:none;" onchange="handleModalFileSelect(this)">
+                            <div class="file-drop-icon">📄</div>
+                            <div class="file-drop-text" id="modal-file-text"><?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center text-muted my-3 small fw-bold">— <?= $locale === 'en' ? 'OR' : 'VEYA' ?> —</div>
+
+                    <!-- Textarea Option -->
+                    <div class="mb-3">
+                        <label for="import-json" class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Option B: Paste JSON Content' : 'Seçenek B: JSON İçeriğini Yapıştır' ?></label>
+                        <textarea id="import-json" class="form-control font-monospace small" rows="6" placeholder='{
   "questions": [
     {
       "question_text": "<?= $locale === 'en' ? 'Sample Question Text?' : 'Örnek Soru Metni?' ?>",
-      "options": ["<?= $locale === 'en' ? 'A Option' : 'A Seçeneği' ?>", "<?= $locale === 'en' ? 'B Option' : 'B Seçeneği' ?>", "<?= $locale === 'en' ? 'C Option' : 'C Seçeneği' ?>"],
+      "options": ["<?= $locale === 'en' ? 'A Option' : 'A Seçeneği' ?>", "<?= $locale === 'en' ? 'B Option' : 'B Seçeneği' ?>"],
       "correct_answer": "B"
     }
   ]
 }'></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-3 border-opacity-10" data-bs-dismiss="modal"><?= htmlspecialchars(t('admin.dashboard.cancel')) ?></button>
@@ -785,17 +820,81 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             }
         }
 
+        function handleModalFileSelect(input) {
+            const text = document.getElementById('modal-file-text');
+            if (input.files && input.files[0]) {
+                text.innerHTML = '<strong>✅ ' + escapeHtml(input.files[0].name) + '</strong>';
+            } else {
+                text.textContent = '<?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?>';
+            }
+        }
+
         async function importQuestions() {
+            const fileInput = document.getElementById('modal-json-file');
             const textarea = document.getElementById('import-json');
+
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        await sendImportPayload(parsed);
+                    } catch (err) {
+                        alert("<?= $locale === 'en' ? 'Invalid JSON file content.' : 'Geçersiz JSON dosyası içeriği.' ?>");
+                    }
+                };
+                reader.readAsText(fileInput.files[0]);
+            } else if (textarea.value.trim() !== "") {
+                try {
+                    const parsed = JSON.parse(textarea.value);
+                    await sendImportPayload(parsed);
+                } catch (e) {
+                    alert(translationInvalidJson);
+                }
+            } else {
+                alert("<?= $locale === 'en' ? 'Please select a file or paste JSON content.' : 'Lütfen bir dosya seçin veya JSON içeriği yapıştırın.' ?>");
+            }
+        }
+
+        async function sendImportPayload(parsed) {
             let payload = {};
-            try {
-                payload = JSON.parse(textarea.value);
-            } catch (e) {
-                alert(translationInvalidJson);
-                return;
+            if (Array.isArray(parsed)) {
+                payload.questions = parsed.map(q => {
+                    const options = q.options || null;
+                    let answer = q.answer !== undefined ? q.answer : (q.correct_answer !== undefined ? q.correct_answer : null);
+                    if (Array.isArray(options) && typeof answer === 'number' && options[answer] !== undefined) {
+                        answer = String.fromCharCode(65 + answer);
+                    }
+                    return {
+                        question_text: q.text || q.question_text || "",
+                        type: Array.isArray(options) && options.length >= 2 ? "multiple_choice" : "open_ended",
+                        options: options,
+                        correct_answer: answer
+                    };
+                });
+            } else {
+                payload = parsed;
+                if (payload.questions && Array.isArray(payload.questions)) {
+                    payload.questions = payload.questions.map(q => {
+                        const options = q.options || null;
+                        let answer = q.answer !== undefined ? q.answer : (q.correct_answer !== undefined ? q.correct_answer : null);
+                        if (Array.isArray(options) && typeof answer === 'number' && options[answer] !== undefined) {
+                            answer = String.fromCharCode(65 + answer);
+                        }
+                        return {
+                            question_text: q.text || q.question_text || "",
+                            type: q.type || (Array.isArray(options) && options.length >= 2 ? "multiple_choice" : "open_ended"),
+                            options: options,
+                            correct_answer: answer
+                        };
+                    });
+                }
             }
 
             try {
+                const btn = document.querySelector("#importQuestionsModal .btn-custom-primary");
+                if (btn) btn.disabled = true;
+
                 const res = await fetch(<?= json_encode(eduqr_path('/admin/sessions/')) ?> + sessionId + '/questions/import', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -810,6 +909,9 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 }
             } catch (e) {
                 alert(translationAlertConnectionError);
+            } finally {
+                const btn = document.querySelector("#importQuestionsModal .btn-custom-primary");
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -869,6 +971,34 @@ $locale = \EduQR\I18n\I18nService::getLocale();
 
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+
+            // Wire drag-drop zone inside import modal
+            const modalDropZone = document.getElementById('modal-file-drop-zone');
+            if (modalDropZone) {
+                modalDropZone.addEventListener('click', () => {
+                    document.getElementById('modal-json-file').click();
+                });
+                modalDropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    modalDropZone.classList.add('dragover');
+                    modalDropZone.style.borderColor = 'var(--primary)';
+                    modalDropZone.style.background = 'rgba(59, 130, 246, 0.05)';
+                });
+                modalDropZone.addEventListener('dragleave', () => {
+                    modalDropZone.classList.remove('dragover');
+                    modalDropZone.style.borderColor = '';
+                    modalDropZone.style.background = '';
+                });
+                modalDropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    modalDropZone.classList.remove('dragover');
+                    modalDropZone.style.borderColor = '';
+                    modalDropZone.style.background = '';
+                    const fileInput = document.getElementById('modal-json-file');
+                    fileInput.files = e.dataTransfer.files;
+                    handleModalFileSelect(fileInput);
+                });
+            }
         });
     </script>
 </body>

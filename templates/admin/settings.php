@@ -517,54 +517,6 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                 </form>
             </div>
 
-            <!-- JSON Import Card -->
-            <div class="settings-card">
-                <h3 class="card-title">📥 <?= $locale === 'en' ? 'Import Questions from JSON' : "JSON'dan Soru İçe Aktar" ?></h3>
-                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px; line-height:1.6;">
-                    <?= $locale === 'en'
-                        ? 'Upload a JSON file to bulk-import questions into your question bank.'
-                        : 'Soru bankasına toplu soru eklemek için JSON dosyası yükleyin.'
-                    ?>
-                </p>
-
-                <form id="import-json-form" onsubmit="handleImportJson(event)">
-                    <div class="mb-3">
-                        <label class="form-label-custom"><?= $locale === 'en' ? 'Source Title (optional)' : 'Kaynak Başlığı (isteğe bağlı)' ?></label>
-                        <input type="text" class="form-input-custom" id="import_source_title" name="source_title"
-                               placeholder="<?= $locale === 'en' ? 'e.g. Chapter 3 Notes' : 'ör. Bölüm 3 Notları' ?>">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label-custom"><?= $locale === 'en' ? 'JSON File' : 'JSON Dosyası' ?></label>
-                        <div class="file-drop-zone" id="file-drop-zone">
-                            <input type="file" id="json_file" name="json_file" accept=".json" onchange="handleFileSelect(this)">
-                            <div class="file-drop-icon">📄</div>
-                            <div class="file-drop-text"><?= $locale === 'en' ? 'Click or drag & drop your .json file here' : '.json dosyanızı buraya tıklayın veya sürükleyin' ?></div>
-                            <div class="file-name-display" id="file-name-display"></div>
-                        </div>
-                    </div>
-
-                    <details style="margin-bottom:16px;">
-                        <summary style="font-size:0.78rem; color:var(--text-muted); cursor:pointer; font-weight:600;">
-                            <?= $locale === 'en' ? 'View expected JSON format' : 'Beklenen JSON formatını görüntüle' ?>
-                        </summary>
-                        <pre style="background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; padding:12px; font-size:0.72rem; margin-top:8px; overflow-x:auto; color:var(--text-muted);">[
-  {
-    "text": "<?= $locale === 'en' ? 'Question text?' : 'Soru metni?' ?>",
-    "options": ["A", "B", "C", "D"],
-    "answer": 0
-  },
-  {
-    "text": "<?= $locale === 'en' ? 'Open-ended question (no options)' : 'Açık uçlu soru (şıksız)' ?>"
-  }
-]</pre>
-                    </details>
-
-                    <button type="submit" id="import-json-btn" class="btn-save">
-                        <?= $locale === 'en' ? 'Import Questions' : 'Soruları İçe Aktar' ?>
-                    </button>
-                </form>
-            </div>
-
             <!-- Danger Zone: Delete Account -->
             <div class="settings-card danger-card">
                 <h3 class="card-title" style="color:#ef4444;">⚠️ <?= $locale === 'en' ? 'Danger Zone' : 'Tehlikeli Bölge' ?></h3>
@@ -588,7 +540,6 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
     const changePasswordUrl  = <?= json_encode(eduqr_path('/admin/settings/change-password')) ?>;
     const updateProfileUrl   = <?= json_encode(eduqr_path('/admin/settings/update-profile')) ?>;
     const deleteAccountUrl   = <?= json_encode(eduqr_path('/admin/settings/delete-account')) ?>;
-    const importJsonUrl      = <?= json_encode(eduqr_path('/admin/question-bank/import-json')) ?>;
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
@@ -679,68 +630,6 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             showToast('Bağlantı hatası: ' + err.message, 'error');
         } finally {
             btn.disabled = false;
-        }
-    }
-
-    // ── JSON Import ──────────────────────────────────────────────
-    function handleFileSelect(input) {
-        const display = document.getElementById('file-name-display');
-        if (input.files && input.files[0]) {
-            display.textContent = '✅ ' + input.files[0].name;
-            display.style.display = 'block';
-        } else {
-            display.style.display = 'none';
-        }
-    }
-
-    const dropZone = document.getElementById('file-drop-zone');
-    if (dropZone) {
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            const fileInput = document.getElementById('json_file');
-            fileInput.files = e.dataTransfer.files;
-            handleFileSelect(fileInput);
-        });
-    }
-
-    async function handleImportJson(e) {
-        e.preventDefault();
-        const fileInput = document.getElementById('json_file');
-        const btn = document.getElementById('import-json-btn');
-
-        if (!fileInput.files || fileInput.files.length === 0) {
-            showToast('<?= $locale === "en" ? "Please select a JSON file." : "Lütfen bir JSON dosyası seçin." ?>', 'error');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('json_file', fileInput.files[0]);
-        const sourceTitle = document.getElementById('import_source_title').value;
-        if (sourceTitle) formData.append('source_title', sourceTitle);
-
-        btn.disabled = true;
-        btn.textContent = '<?= $locale === "en" ? "Importing..." : "Aktarılıyor..." ?>';
-
-        try {
-            const res = await fetch(importJsonUrl, { method: 'POST', body: formData });
-            const data = await res.json();
-            if (data.success) {
-                let msg = '<?= $locale === "en" ? "Imported" : "Aktarıldı:" ?> ' + data.count + ' <?= $locale === "en" ? "question(s)" : "soru" ?>';
-                if (data.skipped > 0) msg += ' (' + data.skipped + ' <?= $locale === "en" ? "skipped" : "atlandı" ?>)';
-                showToast(msg, 'success');
-                document.getElementById('import-json-form').reset();
-                document.getElementById('file-name-display').style.display = 'none';
-            } else {
-                showToast(data.error || '<?= $locale === "en" ? "Import failed." : "Aktarım başarısız." ?>', 'error');
-            }
-        } catch (err) {
-            showToast('<?= $locale === "en" ? "Connection error: " : "Bağlantı hatası: " ?>' + err.message, 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = '<?= $locale === "en" ? "Import Questions" : "Soruları İçe Aktar" ?>';
         }
     }
 
