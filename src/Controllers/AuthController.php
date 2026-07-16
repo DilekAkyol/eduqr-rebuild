@@ -484,5 +484,41 @@ final class AuthController
         echo json_encode(['success' => true]);
         exit;
     }
-}
 
+    public function deleteAccount(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $user = AuthService::user();
+        if ($user === null) {
+            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            exit;
+        }
+
+        $rawBody  = file_get_contents('php://input') ?: '{}';
+        $body     = json_decode($rawBody, true) ?: [];
+        $password = $body['password'] ?? '';
+
+        if ($password === '') {
+            echo json_encode(['success' => false, 'error' => 'Şifre zorunludur.']);
+            exit;
+        }
+
+        $userRepo = new \EduQR\Repositories\UserRepository();
+        $dbUser   = $userRepo->findById((int)$user['id']);
+
+        if ($dbUser === null || !password_verify($password, $dbUser['password_hash'])) {
+            echo json_encode(['success' => false, 'error' => 'Şifre hatalı. Hesap silinmedi.']);
+            exit;
+        }
+
+        // Tüm verileri ve hesabı sil
+        $userRepo->deleteById((int)$dbUser['id']);
+
+        // Oturumu kapat
+        $this->authService->logout();
+
+        echo json_encode(['success' => true, 'redirect' => eduqr_path('/login')]);
+        exit;
+    }
+}

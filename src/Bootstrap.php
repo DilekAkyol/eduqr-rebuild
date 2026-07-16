@@ -92,6 +92,11 @@ final class Bootstrap
             (new \EduQR\Controllers\AuthController())->updateProfile();
         });
 
+        $router->post('/eduqr-rebuild/public/admin/settings/delete-account', function (): void {
+            \EduQR\Middleware\AuthMiddleware::handle();
+            (new \EduQR\Controllers\AuthController())->deleteAccount();
+        });
+
         // ── Korumalı Ders Rotaları ──────────────────────────────────────────
         $router->post('/eduqr-rebuild/public/admin/courses', function (): void {
             \EduQR\Middleware\AuthMiddleware::handle();
@@ -204,6 +209,11 @@ final class Bootstrap
         $router->post('/eduqr-rebuild/public/admin/question-bank/add-manual', function (): void {
             \EduQR\Middleware\AuthMiddleware::handle();
             (new \EduQR\Controllers\QuestionBankController())->addManual();
+        });
+
+        $router->post('/eduqr-rebuild/public/admin/question-bank/import-json', function (): void {
+            \EduQR\Middleware\AuthMiddleware::handle();
+            (new \EduQR\Controllers\QuestionBankController())->importJson();
         });
 
         $router->post('/eduqr-rebuild/public/admin/question-bank/{id}/delete', function (array $p): void {

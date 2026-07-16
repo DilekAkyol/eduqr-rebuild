@@ -251,6 +251,94 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             .settings-grid { grid-template-columns: 1fr; }
         }
 
+        /* ── Danger Zone ────────────────────────────────────────── */
+        .danger-card {
+            border-color: rgba(239, 68, 68, 0.35) !important;
+        }
+        [data-theme="dark"] .danger-card {
+            border-color: rgba(239, 68, 68, 0.25) !important;
+        }
+        .btn-danger-custom {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 11px 22px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-danger-custom:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(239,68,68,0.35); }
+        .btn-danger-custom:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* ── Modal ──────────────────────────────────────────────── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
+        .modal-desc  { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .btn-cancel {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 9px 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel:hover { border-color: var(--accent); }
+
+        /* ── File Upload ────────────────────────────────────────── */
+        .file-drop-zone {
+            border: 2px dashed var(--input-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--input-bg);
+            position: relative;
+        }
+        .file-drop-zone:hover, .file-drop-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(99,102,241,0.05);
+        }
+        .file-drop-zone input[type=file] {
+            position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+        }
+        .file-drop-icon { font-size: 2rem; margin-bottom: 6px; }
+        .file-drop-text { font-size: 0.8rem; color: var(--text-muted); }
+        .file-name-display {
+            font-size: 0.8rem; font-weight: 600; color: var(--accent);
+            margin-top: 8px; display: none;
+        }
+
         .settings-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -428,6 +516,68 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                     <button type="submit" id="save-btn" class="btn-save"><?= $locale === 'en' ? 'Update Password' : 'Şifreyi Güncelle' ?></button>
                 </form>
             </div>
+
+            <!-- JSON Import Card -->
+            <div class="settings-card">
+                <h3 class="card-title">📥 <?= $locale === 'en' ? 'Import Questions from JSON' : "JSON'dan Soru İçe Aktar" ?></h3>
+                <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:16px; line-height:1.6;">
+                    <?= $locale === 'en'
+                        ? 'Upload a JSON file to bulk-import questions into your question bank.'
+                        : 'Soru bankasına toplu soru eklemek için JSON dosyası yükleyin.'
+                    ?>
+                </p>
+
+                <form id="import-json-form" onsubmit="handleImportJson(event)">
+                    <div class="mb-3">
+                        <label class="form-label-custom"><?= $locale === 'en' ? 'Source Title (optional)' : 'Kaynak Başlığı (isteğe bağlı)' ?></label>
+                        <input type="text" class="form-input-custom" id="import_source_title" name="source_title"
+                               placeholder="<?= $locale === 'en' ? 'e.g. Chapter 3 Notes' : 'ör. Bölüm 3 Notları' ?>">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom"><?= $locale === 'en' ? 'JSON File' : 'JSON Dosyası' ?></label>
+                        <div class="file-drop-zone" id="file-drop-zone">
+                            <input type="file" id="json_file" name="json_file" accept=".json" onchange="handleFileSelect(this)">
+                            <div class="file-drop-icon">📄</div>
+                            <div class="file-drop-text"><?= $locale === 'en' ? 'Click or drag & drop your .json file here' : '.json dosyanızı buraya tıklayın veya sürükleyin' ?></div>
+                            <div class="file-name-display" id="file-name-display"></div>
+                        </div>
+                    </div>
+
+                    <details style="margin-bottom:16px;">
+                        <summary style="font-size:0.78rem; color:var(--text-muted); cursor:pointer; font-weight:600;">
+                            <?= $locale === 'en' ? 'View expected JSON format' : 'Beklenen JSON formatını görüntüle' ?>
+                        </summary>
+                        <pre style="background:var(--input-bg); border:1px solid var(--input-border); border-radius:8px; padding:12px; font-size:0.72rem; margin-top:8px; overflow-x:auto; color:var(--text-muted);">[
+  {
+    "text": "<?= $locale === 'en' ? 'Question text?' : 'Soru metni?' ?>",
+    "options": ["A", "B", "C", "D"],
+    "answer": 0
+  },
+  {
+    "text": "<?= $locale === 'en' ? 'Open-ended question (no options)' : 'Açık uçlu soru (şıksız)' ?>"
+  }
+]</pre>
+                    </details>
+
+                    <button type="submit" id="import-json-btn" class="btn-save">
+                        <?= $locale === 'en' ? 'Import Questions' : 'Soruları İçe Aktar' ?>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Danger Zone: Delete Account -->
+            <div class="settings-card danger-card">
+                <h3 class="card-title" style="color:#ef4444;">⚠️ <?= $locale === 'en' ? 'Danger Zone' : 'Tehlikeli Bölge' ?></h3>
+                <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:20px; line-height:1.6;">
+                    <?= $locale === 'en'
+                        ? 'Permanently delete your account. This will remove <strong>all your courses, sessions, participants, question banks</strong> and account data. This cannot be undone.'
+                        : 'Hesabınızı kalıcı olarak silin. <strong>Tüm dersleriniz, oturumlarınız, katılımcılar ve soru bankası</strong> silinir. Bu işlem geri alınamaz.'
+                    ?>
+                </p>
+                <button type="button" id="open-delete-modal-btn" class="btn-danger-custom" onclick="openDeleteModal()">
+                    🗑️ <?= $locale === 'en' ? 'Delete My Account' : 'Hesabımı Sil' ?>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -435,8 +585,10 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 <div class="toast-container" id="toast-container"></div>
 
 <script>
-    const changePasswordUrl = <?= json_encode(eduqr_path('/admin/settings/change-password')) ?>;
-    const updateProfileUrl = <?= json_encode(eduqr_path('/admin/settings/update-profile')) ?>;
+    const changePasswordUrl  = <?= json_encode(eduqr_path('/admin/settings/change-password')) ?>;
+    const updateProfileUrl   = <?= json_encode(eduqr_path('/admin/settings/update-profile')) ?>;
+    const deleteAccountUrl   = <?= json_encode(eduqr_path('/admin/settings/delete-account')) ?>;
+    const importJsonUrl      = <?= json_encode(eduqr_path('/admin/question-bank/import-json')) ?>;
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
@@ -529,6 +681,138 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             btn.disabled = false;
         }
     }
+
+    // ── JSON Import ──────────────────────────────────────────────
+    function handleFileSelect(input) {
+        const display = document.getElementById('file-name-display');
+        if (input.files && input.files[0]) {
+            display.textContent = '✅ ' + input.files[0].name;
+            display.style.display = 'block';
+        } else {
+            display.style.display = 'none';
+        }
+    }
+
+    const dropZone = document.getElementById('file-drop-zone');
+    if (dropZone) {
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const fileInput = document.getElementById('json_file');
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelect(fileInput);
+        });
+    }
+
+    async function handleImportJson(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('json_file');
+        const btn = document.getElementById('import-json-btn');
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showToast('<?= $locale === "en" ? "Please select a JSON file." : "Lütfen bir JSON dosyası seçin." ?>', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('json_file', fileInput.files[0]);
+        const sourceTitle = document.getElementById('import_source_title').value;
+        if (sourceTitle) formData.append('source_title', sourceTitle);
+
+        btn.disabled = true;
+        btn.textContent = '<?= $locale === "en" ? "Importing..." : "Aktarılıyor..." ?>';
+
+        try {
+            const res = await fetch(importJsonUrl, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                let msg = '<?= $locale === "en" ? "Imported" : "Aktarıldı:" ?> ' + data.count + ' <?= $locale === "en" ? "question(s)" : "soru" ?>';
+                if (data.skipped > 0) msg += ' (' + data.skipped + ' <?= $locale === "en" ? "skipped" : "atlandı" ?>)';
+                showToast(msg, 'success');
+                document.getElementById('import-json-form').reset();
+                document.getElementById('file-name-display').style.display = 'none';
+            } else {
+                showToast(data.error || '<?= $locale === "en" ? "Import failed." : "Aktarım başarısız." ?>', 'error');
+            }
+        } catch (err) {
+            showToast('<?= $locale === "en" ? "Connection error: " : "Bağlantı hatası: " ?>' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '<?= $locale === "en" ? "Import Questions" : "Soruları İçe Aktar" ?>';
+        }
+    }
+
+    // ── Delete Account Modal ─────────────────────────────────────
+    function openDeleteModal() {
+        document.getElementById('delete-modal').classList.add('show');
+        document.getElementById('delete-password-input').value = '';
+        setTimeout(() => document.getElementById('delete-password-input').focus(), 100);
+    }
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').classList.remove('show');
+    }
+
+    async function handleDeleteAccount() {
+        const password = document.getElementById('delete-password-input').value;
+        const btn = document.getElementById('confirm-delete-btn');
+
+        if (!password) {
+            showToast('<?= $locale === "en" ? "Please enter your password." : "Lütfen şifrenizi girin." ?>', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = '<?= $locale === "en" ? "Deleting..." : "Siliniyor..." ?>';
+
+        try {
+            const res = await fetch(deleteAccountUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('<?= $locale === "en" ? "Account deleted. Redirecting..." : "Hesap silindi. Yönlendiriliyor..." ?>', 'success');
+                setTimeout(() => { window.location.href = data.redirect || '<?= eduqr_path("/login") ?>'; }, 1500);
+            } else {
+                showToast(data.error || '<?= $locale === "en" ? "Could not delete account." : "Hesap silinemedi." ?>', 'error');
+                btn.disabled = false;
+                btn.textContent = '<?= $locale === "en" ? "Yes, Delete My Account" : "Evet, Hesabımı Sil" ?>';
+            }
+        } catch (err) {
+            showToast('<?= $locale === "en" ? "Connection error: " : "Bağlantı hatası: " ?>' + err.message, 'error');
+            btn.disabled = false;
+            btn.textContent = '<?= $locale === "en" ? "Yes, Delete My Account" : "Evet, Hesabımı Sil" ?>';
+        }
+    }
 </script>
+
+<!-- Delete Account Confirmation Modal -->
+<div class="modal-overlay" id="delete-modal" onclick="if(event.target===this) closeDeleteModal()">
+    <div class="modal-box">
+        <div class="modal-title">⚠️ <?= $locale === 'en' ? 'Confirm Account Deletion' : 'Hesap Silmeyi Onayla' ?></div>
+        <p class="modal-desc">
+            <?= $locale === 'en'
+                ? 'This will permanently delete your account and all associated data. Enter your current password to confirm.'
+                : 'Bu işlem hesabınızı ve tüm ilgili verilerinizi kalıcı olarak silecektir. Onaylamak için mevcut şifrenizi girin.'
+            ?>
+        </p>
+        <div class="mb-3">
+            <label class="form-label-custom"><?= $locale === 'en' ? 'Your Password' : 'Şifreniz' ?></label>
+            <input type="password" class="form-input-custom" id="delete-password-input"
+                   placeholder="<?= $locale === 'en' ? 'Enter your password' : 'Şifrenizi girin' ?>"
+                   onkeydown="if(event.key==='Enter') handleDeleteAccount()">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeDeleteModal()"><?= $locale === 'en' ? 'Cancel' : 'İptal' ?></button>
+            <button class="btn-danger-custom" id="confirm-delete-btn" onclick="handleDeleteAccount()">
+                <?= $locale === 'en' ? 'Yes, Delete My Account' : 'Evet, Hesabımı Sil' ?>
+            </button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

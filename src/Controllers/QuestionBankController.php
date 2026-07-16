@@ -338,4 +338,97 @@ PROMPT;
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
+    /**
+     * POST /admin/question-bank/import-json
+     * JSON dosyasından toplu soru aktarır
+     */
+    public function importJson(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $user = AuthService::user();
+        if ($user === null) {
+            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            exit;
+        }
+
+        // Dosya yükleme kontrolü
+        if (!isset($_FILES['json_file']) || $_FILES['json_file']['error'] !== UPLOAD_ERR_OK) {
+            echo json_encode(['success' => false, 'error' => 'Dosya yüklenemedi.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $file = $_FILES['json_file'];
+
+        // Boyut kontrolü (maks 2MB)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            echo json_encode(['success' => false, 'error' => 'Dosya boyutu 2MB\'yi aşamaz.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // Uzantı kontrolü
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if ($ext !== 'json') {
+            echo json_encode(['success' => false, 'error' => 'Sadece .json uzantılı dosyalar kabul edilir.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $contents = file_get_contents($file['tmp_name']);
+        $data     = json_decode($contents, true);
+
+        if (!is_array($data)) {
+            echo json_encode(['success' => false, 'error' => 'Geçersiz JSON formatı. Kök eleman bir dizi olmalıdır.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $sourceTitle = trim((string)($_POST['source_title'] ?? '')) ?: null;
+        $created     = [];
+        $skipped     = 0;
+
+        foreach ($data as $index => $q) {
+            if (!is_array($q)) { $skipped++; continue; }
+
+            $text    = trim((string)($q['text'] ?? $q['question_text'] ?? ''));
+            $options = $q['options'] ?? null;
+            $answer  = $q['answer'] ?? $q['correct_answer'] ?? null;
+
+            if ($text === '') { $skipped++; continue; }
+
+            // Tip belirleme
+            if (is_array($options) && count($options) >= 2) {
+                $type = 'multiple_choice';
+                // answer sayısal index ise şık metnine çevir
+                if (is_int($answer) && isset($options[$answer])) {
+                    $answer = $options[$answer];
+                }
+            } else {
+                $type    = 'open_ended';
+                $options = null;
+                $answer  = null;
+            }
+
+            $id = $this->bankRepo->create(
+                (int)$user['id'],
+                $text,
+                $type,
+                $options,
+                $answer,
+                $sourceTitle
+            );
+
+            $created[] = [
+                'id'            => $id,
+                'question_text' => $text,
+                'type'          => $type,
+            ];
+        }
+
+        echo json_encode([
+            'success' => true,
+            'count'   => count($created),
+            'skipped' => $skipped,
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
 }

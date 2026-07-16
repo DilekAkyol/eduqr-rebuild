@@ -101,4 +101,53 @@ final class UserRepository
             'id'            => $userId,
         ]);
     }
+
+    /**
+     * Kullanıcıyı ve ona ait tüm verileri (kurslar, oturumlar, katılımcılar) siler.
+     */
+    public function deleteById(int $userId): void
+    {
+        // Önce kullanıcının kurslarına ait oturumların katılımcı ve cevaplarını sil
+        $this->db->prepare(
+            "DELETE a FROM answers a
+             JOIN participants p ON a.participant_id = p.id
+             JOIN sessions s ON p.session_id = s.id
+             JOIN courses c ON s.course_id = c.id
+             WHERE c.user_id = :user_id"
+        )->execute(['user_id' => $userId]);
+
+        $this->db->prepare(
+            "DELETE p FROM participants p
+             JOIN sessions s ON p.session_id = s.id
+             JOIN courses c ON s.course_id = c.id
+             WHERE c.user_id = :user_id"
+        )->execute(['user_id' => $userId]);
+
+        $this->db->prepare(
+            "DELETE q FROM questions q
+             JOIN sessions s ON q.session_id = s.id
+             JOIN courses c ON s.course_id = c.id
+             WHERE c.user_id = :user_id"
+        )->execute(['user_id' => $userId]);
+
+        $this->db->prepare(
+            "DELETE s FROM sessions s
+             JOIN courses c ON s.course_id = c.id
+             WHERE c.user_id = :user_id"
+        )->execute(['user_id' => $userId]);
+
+        $this->db->prepare(
+            "DELETE FROM courses WHERE user_id = :user_id"
+        )->execute(['user_id' => $userId]);
+
+        // Soru bankasını sil
+        $this->db->prepare(
+            "DELETE FROM question_bank WHERE user_id = :user_id"
+        )->execute(['user_id' => $userId]);
+
+        // Son olarak kullanıcıyı sil
+        $this->db->prepare(
+            "DELETE FROM users WHERE id = :id"
+        )->execute(['id' => $userId]);
+    }
 }
