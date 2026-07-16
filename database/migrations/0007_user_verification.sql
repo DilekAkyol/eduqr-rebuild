@@ -1,0 +1,4 @@
+ALTER TABLE users 
+ADD COLUMN is_verified TINYINT(1) DEFAULT 0,
+ADD COLUMN verification_code VARCHAR(6) DEFAULT NULL,
+ADD COLUMN verification_expires_at TIMESTAMP DEFAULT NULL;

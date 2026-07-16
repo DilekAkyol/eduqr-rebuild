@@ -1,0 +1,28 @@
+# Dependency directories
+/vendor/
+
+# Configuration and environment secrets
+.env
+.env.backup
+.env.production
+.env.development
+.env.local
+
+# IDE/Editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary logs/files
+temp_mail.txt
+logs/
+*.log
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
