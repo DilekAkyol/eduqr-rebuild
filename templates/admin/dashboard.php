@@ -22,6 +22,16 @@ $recentSessionStmt = $db->prepare("
 $recentSessionStmt->execute(['user_id' => (int)$user['id']]);
 $recentSession = $recentSessionStmt->fetch();
 $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
+
+// Fetch active sessions count
+$activeSessionsStmt = $db->prepare("
+    SELECT COUNT(s.id) as cnt 
+    FROM sessions s
+    JOIN courses c ON s.course_id = c.id
+    WHERE c.user_id = :user_id AND s.status = 'active'
+");
+$activeSessionsStmt->execute(['user_id' => (int)$user['id']]);
+$activeSessionsCount = (int)($activeSessionsStmt->fetch()['cnt'] ?? 0);
 ?>
 <!DOCTYPE html>
 <html lang="<?= $locale ?>">
@@ -556,7 +566,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 
                     <div class="p-3 rounded-4 bg-white bg-opacity-5 border border-white border-opacity-5">
                         <span class="text-muted d-block small mb-1"><?= htmlspecialchars(t('admin.dashboard.stats_active_sessions')) ?></span>
-                        <span class="stat-value">0</span>
+                        <span class="stat-value"><?= $activeSessionsCount ?></span>
                     </div>
                 </div>
             </div>
