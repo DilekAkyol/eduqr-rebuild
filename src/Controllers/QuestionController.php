@@ -52,6 +52,14 @@ final class QuestionController
                 }
             }
             $correctAnswer = $_POST['correct_answer'] ?? null;
+        } elseif ($type === 'yes_no') {
+            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') ? ["Yes", "No"] : ["Evet", "Hayır"];
+            $correctAnswer = $_POST['correct_answer'] ?? null;
+        } elseif ($type === 'likert') {
+            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') 
+                ? ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
+                : ["Kesinlikle Katılmıyorum", "Katılmıyorum", "Kararsızım", "Katılıyorum", "Kesinlikle Katılıyorum"];
+            $correctAnswer = null;
         }
 
         if ($text !== '') {

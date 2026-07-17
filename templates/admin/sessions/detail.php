@@ -537,7 +537,19 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                                                 <?php else: ?>
                                                     <span class="badge bg-secondary bg-opacity-20 text-muted py-1 px-2 rounded-pill small"><?= htmlspecialchars(t('admin.session.status_draft')) ?></span>
                                                 <?php endif; ?>
-                                                <span class="text-muted small"><?= $q['type'] === 'open_ended' ? ($locale === 'en' ? 'Open-Ended' : 'Açık Uçlu') : htmlspecialchars(t('admin.session.type_mc')) ?></span>
+                                                <?php
+                                                $typeLabel = '';
+                                                if ($q['type'] === 'open_ended') {
+                                                    $typeLabel = $locale === 'en' ? 'Open-Ended' : 'Açık Uçlu';
+                                                } elseif ($q['type'] === 'yes_no') {
+                                                    $typeLabel = $locale === 'en' ? 'Yes / No' : 'Evet / Hayır';
+                                                } elseif ($q['type'] === 'likert') {
+                                                    $typeLabel = $locale === 'en' ? 'Likert Scale' : 'Likert Ölçeği';
+                                                } else {
+                                                    $typeLabel = htmlspecialchars(t('admin.session.type_mc'));
+                                                }
+                                                ?>
+                                                <span class="text-muted small"><?= $typeLabel ?></span>
                                             </div>
                                             <h5 class="fw-bold mb-3"><?= htmlspecialchars($q['question_text']) ?></h5>
                                             
@@ -614,9 +626,13 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                             <select class="form-select" id="question_type" name="type" onchange="toggleQuestionTypeFields()">
                                 <option value="multiple_choice" selected><?= $locale === 'en' ? 'Multiple Choice' : 'Çoktan Seçmeli' ?></option>
                                 <option value="open_ended"><?= $locale === 'en' ? 'Open-Ended' : 'Açık Uçlu' ?></option>
+                                <option value="yes_no"><?= $locale === 'en' ? 'Yes / No' : 'Evet / Hayır' ?></option>
+                                <option value="likert"><?= $locale === 'en' ? 'Likert Scale (5-point)' : 'Likert Ölçeği (5\'li)' ?></option>
                             </select>
                         </div>
-                        <div id="mc-fields-container">
+                        
+                        <!-- Options Inputs Container -->
+                        <div id="mc-options-container">
                             <div class="mb-3">
                                 <label class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.session.options')) ?></label>
                                 <input type="text" class="form-control mb-2 option-input" name="options[]" required placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'A'])) ?>">
@@ -624,8 +640,12 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                                 <input type="text" class="form-control mb-2 option-input" name="options[]" placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'C'])) ?> (<?= $locale === 'en' ? 'Optional' : 'İsteğe Bağlı' ?>)">
                                 <input type="text" class="form-control mb-2 option-input" name="options[]" placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'D'])) ?> (<?= $locale === 'en' ? 'Optional' : 'İsteğe Bağlı' ?>)">
                             </div>
+                        </div>
+
+                        <!-- Correct Answer Selection -->
+                        <div id="correct-answer-container">
                             <div class="mb-3">
-                                <label for="correct_answer" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.session.correct_answer')) ?></label>
+                                <label id="correct-answer-label" for="correct_answer" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.session.correct_answer')) ?></label>
                                 <select class="form-select" id="correct_answer" name="correct_answer">
                                     <option value="A">A</option>
                                     <option value="B">B</option>
@@ -956,16 +976,50 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         }
         function toggleQuestionTypeFields() {
             const type = document.getElementById('question_type').value;
-            const mcContainer = document.getElementById('mc-fields-container');
-            const optionInputs = mcContainer.querySelectorAll('.option-input');
+            const optionsContainer = document.getElementById('mc-options-container');
+            const correctContainer = document.getElementById('correct-answer-container');
+            const correctSelect = document.getElementById('correct_answer');
+            const optionInputs = optionsContainer.querySelectorAll('.option-input');
 
-            if (type === 'open_ended') {
-                mcContainer.classList.add('d-none');
+            // Reset correct select choices based on type
+            correctSelect.innerHTML = '';
+
+            if (type === 'multiple_choice') {
+                optionsContainer.classList.remove('d-none');
+                correctContainer.classList.remove('d-none');
+                optionInputs.forEach((input, idx) => {
+                    if (idx < 2) input.setAttribute('required', 'required');
+                });
+                // A, B, C, D
+                ['A', 'B', 'C', 'D'].forEach(val => {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    opt.textContent = val;
+                    correctSelect.appendChild(opt);
+                });
+            } else if (type === 'yes_no') {
+                optionsContainer.classList.add('d-none');
+                correctContainer.classList.remove('d-none');
                 optionInputs.forEach(input => input.removeAttribute('required'));
-            } else {
-                mcContainer.classList.remove('d-none');
-                if (optionInputs[0]) optionInputs[0].setAttribute('required', 'required');
-                if (optionInputs[1]) optionInputs[1].setAttribute('required', 'required');
+                // A (Evet), B (Hayır)
+                const optA = document.createElement('option');
+                optA.value = 'A';
+                optA.textContent = 'A (Evet / Yes)';
+                const optB = document.createElement('option');
+                optB.value = 'B';
+                optB.textContent = 'B (Hayır / No)';
+                correctSelect.appendChild(optA);
+                correctSelect.appendChild(optB);
+                
+                // Add none
+                const optNone = document.createElement('option');
+                optNone.value = '';
+                optNone.textContent = '<?= $locale === 'en' ? 'None' : 'Yok' ?>';
+                correctSelect.appendChild(optNone);
+            } else { // likert, open_ended
+                optionsContainer.classList.add('d-none');
+                correctContainer.classList.add('d-none');
+                optionInputs.forEach(input => input.removeAttribute('required'));
             }
         }
 

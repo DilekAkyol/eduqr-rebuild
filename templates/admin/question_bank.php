@@ -780,6 +780,10 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                                         <?php endif; ?>
                                         <?php if (isset($q['type']) && $q['type'] === 'open_ended'): ?>
                                             <span class="q-tag" style="background:rgba(139, 92, 246, 0.1); color:#8b5cf6; font-weight: 600;"><?= $locale === 'tr' ? 'Açık Uçlu' : 'Open-Ended' ?></span>
+                                        <?php elseif (isset($q['type']) && $q['type'] === 'yes_no'): ?>
+                                            <span class="q-tag" style="background:rgba(16, 185, 129, 0.1); color:#10b981; font-weight: 600;"><?= $locale === 'tr' ? 'Evet/Hayır' : 'Yes/No' ?></span>
+                                        <?php elseif (isset($q['type']) && $q['type'] === 'likert'): ?>
+                                            <span class="q-tag" style="background:rgba(59, 130, 246, 0.1); color:#3b82f6; font-weight: 600;"><?= $locale === 'tr' ? 'Likert Ölçeği' : 'Likert Scale' ?></span>
                                         <?php endif; ?>
                                         <?php if (!empty($q['correct_answer'])): ?>
                                             <span class="q-correct">✓ <?= htmlspecialchars($q['correct_answer']) ?></span>
@@ -857,6 +861,8 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             <select id="manual-q-type" class="form-select-el" onchange="toggleManualQuestionFields()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); border-radius:10px; width:100%; padding:0.6rem 0.8rem; font-size:0.875rem;">
                 <option value="multiple_choice" selected><?= $locale === 'tr' ? 'Çoktan Seçmeli' : 'Multiple Choice' ?></option>
                 <option value="open_ended"><?= $locale === 'tr' ? 'Açık Uçlu' : 'Open-Ended' ?></option>
+                <option value="yes_no"><?= $locale === 'tr' ? 'Evet / Hayır' : 'Yes / No' ?></option>
+                <option value="likert"><?= $locale === 'tr' ? 'Likert Ölçeği (5\'li)' : 'Likert Scale (5-point)' ?></option>
             </select>
         </div>
         <div class="mb-3">
@@ -865,15 +871,15 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                 placeholder="<?= htmlspecialchars(t('admin.qbank.source_placeholder')) ?>..."></textarea>
         </div>
         <div id="manual-mc-fields">
-            <div class="mb-3">
+            <div class="mb-3" id="manual-options-container">
                 <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_options')) ?></div>
                 <textarea id="manual-q-options" class="form-textarea" style="min-height:90px;"
                     placeholder="<?= $locale === 'tr' ? "A) Seçenek 1\nB) Seçenek 2\nC) Seçenek 3\nD) Seçenek 4" : "A) Option 1\nB) Option 2\nC) Option 3\nD) Option 4" ?>"></textarea>
             </div>
-            <div class="mb-4">
+            <div class="mb-4" id="manual-correct-container">
                 <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_correct')) ?></div>
                 <input type="text" id="manual-q-correct" class="form-input"
-                    placeholder="<?= $locale === 'tr' ? 'Örn: A) Seçenek 1' : 'e.g., A) Option 1' ?>">
+                    placeholder="<?= $locale === 'tr' ? 'Örn: A' : 'e.g., A' ?>">
             </div>
         </div>
 
@@ -901,6 +907,8 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             <select id="edit-q-type" class="form-select-el" onchange="toggleEditQuestionFields()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); border-radius:10px; width:100%; padding:0.6rem 0.8rem; font-size:0.875rem;">
                 <option value="multiple_choice"><?= $locale === 'tr' ? 'Çoktan Seçmeli' : 'Multiple Choice' ?></option>
                 <option value="open_ended"><?= $locale === 'tr' ? 'Açık Uçlu' : 'Open-Ended' ?></option>
+                <option value="yes_no"><?= $locale === 'tr' ? 'Evet / Hayır' : 'Yes / No' ?></option>
+                <option value="likert"><?= $locale === 'tr' ? 'Likert Ölçeği (5\'li)' : 'Likert Scale (5-point)' ?></option>
             </select>
         </div>
         <div class="mb-3">
@@ -908,12 +916,12 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             <textarea id="edit-q-text" class="form-textarea" style="min-height:80px;" placeholder="..."></textarea>
         </div>
         <div id="edit-mc-fields">
-            <div class="mb-3">
+            <div class="mb-3" id="edit-options-container">
                 <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_options')) ?></div>
                 <textarea id="edit-q-options" class="form-textarea" style="min-height:90px;"
                     placeholder="<?= $locale === 'tr' ? "Her satıra bir seçenek yazın" : "Write one option per line" ?>"></textarea>
             </div>
-            <div class="mb-3">
+            <div class="mb-3" id="edit-correct-container">
                 <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_correct')) ?></div>
                 <input type="text" id="edit-q-correct" class="form-input" placeholder="e.g., A">
             </div>
@@ -1197,11 +1205,20 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 
     function toggleManualQuestionFields() {
         const type = document.getElementById('manual-q-type').value;
-        const mcFields = document.getElementById('manual-mc-fields');
-        if (type === 'open_ended') {
-            mcFields.style.display = 'none';
-        } else {
-            mcFields.style.display = 'block';
+        const optCont = document.getElementById('manual-options-container');
+        const corrCont = document.getElementById('manual-correct-container');
+
+        if (type === 'multiple_choice') {
+            optCont.style.display = 'block';
+            corrCont.style.display = 'block';
+            document.getElementById('manual-q-correct').placeholder = 'e.g., A';
+        } else if (type === 'yes_no') {
+            optCont.style.display = 'none';
+            corrCont.style.display = 'block';
+            document.getElementById('manual-q-correct').placeholder = 'e.g., A or B';
+        } else { // open_ended, likert
+            optCont.style.display = 'none';
+            corrCont.style.display = 'none';
         }
     }
 
@@ -1212,7 +1229,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
         const type = document.getElementById('manual-q-type').value;
         const rawOptions = type === 'multiple_choice' ? document.getElementById('manual-q-options').value.trim() : '';
         const options = (type === 'multiple_choice' && rawOptions) ? rawOptions.split('\n').map(o => o.trim()).filter(o => o !== '') : null;
-        const correct = type === 'multiple_choice' ? (document.getElementById('manual-q-correct').value.trim() || null) : null;
+        const correct = (type === 'multiple_choice' || type === 'yes_no') ? (document.getElementById('manual-q-correct').value.trim() || null) : null;
         const sourceTitle = document.getElementById('source-title').value.trim();
 
         try {
@@ -1255,6 +1272,9 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                 if (q.type === 'multiple_choice') {
                     document.getElementById('edit-q-options').value = Array.isArray(q.options) ? q.options.join('\n') : '';
                     document.getElementById('edit-q-correct').value = q.correct_answer || '';
+                } else if (q.type === 'yes_no') {
+                    document.getElementById('edit-q-options').value = '';
+                    document.getElementById('edit-q-correct').value = q.correct_answer || '';
                 } else {
                     document.getElementById('edit-q-options').value = '';
                     document.getElementById('edit-q-correct').value = '';
@@ -1280,11 +1300,20 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 
     function toggleEditQuestionFields() {
         const type = document.getElementById('edit-q-type').value;
-        const mcFields = document.getElementById('edit-mc-fields');
-        if (type === 'open_ended') {
-            mcFields.style.display = 'none';
-        } else {
-            mcFields.style.display = 'block';
+        const optCont = document.getElementById('edit-options-container');
+        const corrCont = document.getElementById('edit-correct-container');
+
+        if (type === 'multiple_choice') {
+            optCont.style.display = 'block';
+            corrCont.style.display = 'block';
+            document.getElementById('edit-q-correct').placeholder = 'e.g., A';
+        } else if (type === 'yes_no') {
+            optCont.style.display = 'none';
+            corrCont.style.display = 'block';
+            document.getElementById('edit-q-correct').placeholder = 'e.g., A or B';
+        } else { // open_ended, likert
+            optCont.style.display = 'none';
+            corrCont.style.display = 'none';
         }
     }
 
@@ -1296,7 +1325,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
         const type = document.getElementById('edit-q-type').value;
         const rawOptions = type === 'multiple_choice' ? document.getElementById('edit-q-options').value.trim() : '';
         const options = (type === 'multiple_choice' && rawOptions) ? rawOptions.split('\n').map(o => o.trim()).filter(o => o !== '') : null;
-        const correct = type === 'multiple_choice' ? (document.getElementById('edit-q-correct').value.trim() || null) : null;
+        const correct = (type === 'multiple_choice' || type === 'yes_no') ? (document.getElementById('edit-q-correct').value.trim() || null) : null;
         const sourceTitle = document.getElementById('edit-q-source').value.trim();
 
         try {

@@ -557,7 +557,19 @@ $participationRate = $totalPossibleAnswers > 0
                             <div class="mb-5 pb-4 border-bottom last-border-none">
                                 <div class="d-flex align-items-center gap-2 mb-2">
                                     <span class="badge bg-secondary bg-opacity-10 text-secondary py-1 px-2.5 rounded-pill small"><?= htmlspecialchars(t('admin.report.question_number', ['num' => ($qIndex + 1)])) ?></span>
-                                    <span class="text-muted small"><?= $q['type'] === 'open_ended' ? ($locale === 'en' ? 'Open-Ended' : 'Açık Uçlu') : htmlspecialchars(t('admin.session.type_mc')) ?></span>
+                                    <?php
+                                    $typeLabel = '';
+                                    if ($q['type'] === 'open_ended') {
+                                        $typeLabel = $locale === 'en' ? 'Open-Ended' : 'Açık Uçlu';
+                                    } elseif ($q['type'] === 'yes_no') {
+                                        $typeLabel = $locale === 'en' ? 'Yes / No' : 'Evet / Hayır';
+                                    } elseif ($q['type'] === 'likert') {
+                                        $typeLabel = $locale === 'en' ? 'Likert Scale' : 'Likert Ölçeği';
+                                    } else {
+                                        $typeLabel = htmlspecialchars(t('admin.session.type_mc'));
+                                    }
+                                    ?>
+                                    <span class="text-muted small"><?= $typeLabel ?></span>
                                 </div>
                                 <h5 class="fw-bold mb-3"><?= htmlspecialchars($q['question_text']) ?></h5>
 

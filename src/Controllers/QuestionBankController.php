@@ -317,6 +317,15 @@ PROMPT;
         $sourceTitle = trim((string)($body['source_title'] ?? ''));
         $type        = trim((string)($body['type'] ?? 'multiple_choice'));
 
+        if ($type === 'yes_no') {
+            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') ? ["Yes", "No"] : ["Evet", "Hayır"];
+        } elseif ($type === 'likert') {
+            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') 
+                ? ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
+                : ["Kesinlikle Katılmıyorum", "Katılmıyorum", "Kararsızım", "Katılıyorum", "Kesinlikle Katılıyorum"];
+            $correct = null;
+        }
+
         if ($text === '') {
             echo json_encode(['success' => false, 'error' => 'Soru metni boş olamaz.'], JSON_UNESCAPED_UNICODE);
             exit;
@@ -509,6 +518,17 @@ PROMPT;
                 echo json_encode(['success' => false, 'error' => 'Doğru cevap belirtilmelidir.'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
+        } elseif ($type === 'yes_no') {
+            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') ? ["Yes", "No"] : ["Evet", "Hayır"];
+            $correctAnswer = trim((string)($input['correct_answer'] ?? ''));
+            if ($correctAnswer === '') {
+                $correctAnswer = null;
+            }
+        } elseif ($type === 'likert') {
+            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') 
+                ? ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
+                : ["Kesinlikle Katılmıyorum", "Katılmıyorum", "Kararsızım", "Katılıyorum", "Kesinlikle Katılıyorum"];
+            $correctAnswer = null;
         }
 
         $updated = $this->bankRepo->update(
