@@ -36,7 +36,7 @@ final class QuestionBankController
         // Kullanıcının tüm aktif oturumlarını getir (oturum seçimi için)
         $db = \EduQR\Support\Database::connect();
         $stmt = $db->prepare(
-            "SELECT s.id, s.title, s.short_code, s.status, c.title AS course_name
+            "SELECT s.id, s.title, s.short_code, s.status, c.title AS course_name, c.title_en AS course_name_en
              FROM sessions s
              JOIN courses c ON s.course_id = c.id
              WHERE c.user_id = :user_id AND s.status != 'closed'

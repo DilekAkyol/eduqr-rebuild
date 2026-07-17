@@ -335,7 +335,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                 <?php foreach ($archivedCourses as $course): ?>
                     <div class="archive-item">
                         <div>
-                            <div class="item-title"><?= htmlspecialchars($course['title']) ?></div>
+                            <div class="item-title"><?= htmlspecialchars(course_title($course)) ?></div>
                             <div class="item-code"><?= htmlspecialchars($course['code']) ?></div>
                         </div>
                         <button class="btn btn-sm btn-outline-primary rounded-3" onclick="restoreCourse(<?= $course['id'] ?>)">

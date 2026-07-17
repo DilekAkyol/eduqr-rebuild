@@ -26,3 +26,7 @@ logs/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Cloudflare binary
+cloudflared.exe
+

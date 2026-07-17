@@ -452,7 +452,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             <div class="col-12">
                 <div class="card-custom mb-4">
                     <div class="d-flex align-items-center gap-3 mb-2">
-                        <span class="text-primary fw-bold text-uppercase tracking-wider small"><?= htmlspecialchars($course['title']) ?></span>
+                        <span class="text-primary fw-bold text-uppercase tracking-wider small"><?= htmlspecialchars(course_title($course)) ?></span>
                         <?php
                         $statusClass = 'badge-active';
                         $statusText = t('admin.session.status_active');

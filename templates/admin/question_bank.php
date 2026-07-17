@@ -798,7 +798,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                     <option value="">— <?= htmlspecialchars(t('admin.qbank.select_session')) ?> —</option>
                     <?php foreach ($sessions as $s): ?>
                     <option value="<?= (int)$s['id'] ?>">
-                        <?= htmlspecialchars($s['course_name']) ?> › <?= htmlspecialchars($s['title']) ?>
+                        <?= htmlspecialchars(($locale === 'en' && !empty($s['course_name_en'])) ? $s['course_name_en'] : $s['course_name']) ?> › <?= htmlspecialchars($s['title']) ?>
                         (<?= htmlspecialchars($s['short_code']) ?>)
                     </option>
                     <?php endforeach; ?>

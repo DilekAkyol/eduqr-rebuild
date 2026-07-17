@@ -471,7 +471,7 @@ $participationRate = $totalPossibleAnswers > 0
                     </div>
                     <h3 class="fw-bold mb-1"><?= htmlspecialchars($session['title']) ?></h3>
                     <div class="text-muted small">
-                        📚 <?= htmlspecialchars($course['title']) ?> (<?= htmlspecialchars($course['code']) ?>)
+                        📚 <?= htmlspecialchars(course_title($course)) ?> (<?= htmlspecialchars($course['code']) ?>)
                     </div>
                 </div>
                 <div class="col-12 col-md-4 text-md-end">

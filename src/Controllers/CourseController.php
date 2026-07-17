@@ -28,9 +28,11 @@ final class CourseController
         }
 
         $title = trim($_POST['title'] ?? '');
+        $titleEn = trim($_POST['title_en'] ?? '');
         $code  = trim($_POST['code'] ?? '');
         $term  = trim($_POST['term'] ?? '');
         $description = trim($_POST['description'] ?? '');
+        $descriptionEn = trim($_POST['description_en'] ?? '');
         $defaultLanguage = trim($_POST['default_language'] ?? 'tr');
 
         if ($title !== '' && $code !== '') {
@@ -40,7 +42,9 @@ final class CourseController
                 $code,
                 $term !== '' ? $term : null,
                 $description !== '' ? $description : null,
-                $defaultLanguage
+                $defaultLanguage,
+                $titleEn !== '' ? $titleEn : null,
+                $descriptionEn !== '' ? $descriptionEn : null
             );
         }
 

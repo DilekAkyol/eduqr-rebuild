@@ -36,17 +36,28 @@ final class CourseRepository
         ]);
     }
 
-    public function create(int $userId, string $title, string $code, ?string $term = null, ?string $description = null, string $defaultLanguage = 'tr'): int
-    {
+    public function create(
+        int $userId,
+        string $title,
+        string $code,
+        ?string $term = null,
+        ?string $description = null,
+        string $defaultLanguage = 'tr',
+        ?string $titleEn = null,
+        ?string $descriptionEn = null
+    ): int {
         $stmt = $this->db->prepare(
-            "INSERT INTO courses (user_id, title, code, term, description, default_language) VALUES (:user_id, :title, :code, :term, :description, :default_language)"
+            "INSERT INTO courses (user_id, title, title_en, code, term, description, description_en, default_language) 
+             VALUES (:user_id, :title, :title_en, :code, :term, :description, :description_en, :default_language)"
         );
         $stmt->execute([
             'user_id'          => $userId,
             'title'            => $title,
+            'title_en'         => $titleEn,
             'code'             => $code,
             'term'             => $term,
             'description'      => $description,
+            'description_en'   => $descriptionEn,
             'default_language' => $defaultLanguage,
         ]);
 

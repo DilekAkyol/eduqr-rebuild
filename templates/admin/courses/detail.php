@@ -22,7 +22,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($course['title']) ?> - eduQR</title>
+    <title><?= htmlspecialchars(course_title($course)) ?> - eduQR</title>
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts: Plus Jakarta Sans -->
@@ -395,9 +395,9 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                             <span class="badge bg-secondary bg-opacity-20 text-muted py-1 px-2.5 rounded-pill small" style="font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.08);"><?= htmlspecialchars($course['term']) ?></span>
                         <?php endif; ?>
                     </div>
-                    <h1 class="h2 fw-bold mt-1 mb-2"><?= htmlspecialchars($course['title']) ?></h1>
-                    <?php if (!empty($course['description'])): ?>
-                        <p class="text-muted mb-3 fs-5"><?= htmlspecialchars($course['description']) ?></p>
+                    <h1 class="h2 fw-bold mt-1 mb-2"><?= htmlspecialchars(course_title($course)) ?></h1>
+                    <?php $desc = course_desc($course); if (!empty($desc)): ?>
+                        <p class="text-muted mb-3 fs-5"><?= htmlspecialchars($desc) ?></p>
                     <?php endif; ?>
                     <p class="text-muted mb-0 small"><?= htmlspecialchars(t('admin.course.sessions_desc')) ?></p>
                 </div>
