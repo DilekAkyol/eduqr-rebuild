@@ -28,23 +28,44 @@ final class CourseController
         }
 
         $title = trim($_POST['title'] ?? '');
-        $titleEn = trim($_POST['title_en'] ?? '');
         $code  = trim($_POST['code'] ?? '');
         $term  = trim($_POST['term'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $descriptionEn = trim($_POST['description_en'] ?? '');
         $defaultLanguage = trim($_POST['default_language'] ?? 'tr');
+
+        $finalTitleTr = $title;
+        $finalTitleEn = $title;
+        $finalDescTr = $description;
+        $finalDescEn = $description;
+
+        if ($title !== '') {
+            if ($defaultLanguage === 'tr') {
+                // Input is Turkish. Translate to English.
+                $translated = $this->autoTranslate($title, $description, 'tr', 'en');
+                $finalTitleTr = $title;
+                $finalTitleEn = $translated['title'];
+                $finalDescTr = $description;
+                $finalDescEn = $translated['description'];
+            } else {
+                // Input is English. Translate to Turkish.
+                $translated = $this->autoTranslate($title, $description, 'en', 'tr');
+                $finalTitleTr = $translated['title'];
+                $finalTitleEn = $title;
+                $finalDescTr = $translated['description'];
+                $finalDescEn = $description;
+            }
+        }
 
         if ($title !== '' && $code !== '') {
             $this->courseRepo->create(
                 $user['id'],
-                $title,
+                $finalTitleTr,
                 $code,
                 $term !== '' ? $term : null,
-                $description !== '' ? $description : null,
+                $finalDescTr !== '' ? $finalDescTr : null,
                 $defaultLanguage,
-                $titleEn !== '' ? $titleEn : null,
-                $descriptionEn !== '' ? $descriptionEn : null
+                $finalTitleEn !== '' ? $finalTitleEn : null,
+                $finalDescEn !== '' ? $finalDescEn : null
             );
         }
 
@@ -116,5 +137,68 @@ final class CourseController
         
         echo json_encode(['success' => true]);
         exit;
+    }
+
+    private function autoTranslate(string $title, string $description, string $sourceLang, string $targetLang): array
+    {
+        $apiKey = \EduQR\Config::get('GEMINI_API_KEY', '');
+        if ($apiKey === '') {
+            return ['title' => $title, 'description' => $description];
+        }
+
+        $prompt = "You are a professional translator. Translate the following JSON object's values from " . 
+                  ($sourceLang === 'tr' ? 'Turkish' : 'English') . " to " . ($targetLang === 'en' ? 'English' : 'Turkish') . 
+                  ". Keep the keys exactly the same. Do not output anything else other than the translated JSON object. Return it as a valid JSON object without markdown formatting.
+JSON object to translate:
+" . json_encode(['title' => $title, 'description' => $description], JSON_UNESCAPED_UNICODE);
+
+        $payload = json_encode([
+            'contents' => [
+                ['parts' => [['text' => $prompt]]]
+            ],
+            'generationConfig' => [
+                'temperature'      => 0.2,
+                'maxOutputTokens'  => 1024,
+                'responseMimeType' => 'application/json',
+            ]
+        ]);
+
+        $geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={$apiKey}";
+
+        $ch = curl_init($geminiUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            CURLOPT_TIMEOUT        => 10,
+        ]);
+
+        $response   = curl_exec($ch);
+        curl_close($ch);
+
+        if ($response === false) {
+            return ['title' => $title, 'description' => $description];
+        }
+
+        $geminiData = json_decode($response, true);
+        $rawText = $geminiData['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+        if ($rawText === '') {
+            return ['title' => $title, 'description' => $description];
+        }
+
+        $rawText = preg_replace('/^```json\s*/i', '', trim($rawText));
+        $rawText = preg_replace('/```\s*$/', '', $rawText);
+
+        $decoded = json_decode($rawText, true);
+        if ($decoded && isset($decoded['title'])) {
+            return [
+                'title' => trim((string)$decoded['title']),
+                'description' => isset($decoded['description']) ? trim((string)$decoded['description']) : $description
+            ];
+        }
+
+        return ['title' => $title, 'description' => $description];
     }
 }

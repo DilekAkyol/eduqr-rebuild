@@ -574,12 +574,8 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                 <form action="<?= eduqr_path('/admin/courses') ?>" method="POST">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="title" class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Course Name (Turkish)' : 'Ders Adı (Türkçe)' ?></label>
+                            <label for="title" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.dashboard.modal_course_name')) ?></label>
                             <input type="text" class="form-control" id="title" name="title" required placeholder="<?= htmlspecialchars(t('admin.dashboard.modal_course_name_placeholder')) ?>" autocomplete="off">
-                        </div>
-                        <div class="mb-3">
-                            <label for="title_en" class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Course Name (English)' : 'Ders Adı (İngilizce)' ?></label>
-                            <input type="text" class="form-control" id="title_en" name="title_en" required placeholder="e.g. Data Structures" autocomplete="off">
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -599,12 +595,8 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                             <input type="text" class="form-control" id="term" name="term" placeholder="<?= htmlspecialchars(t('admin.dashboard.modal_term_placeholder')) ?>" autocomplete="off">
                         </div>
                         <div class="mb-3">
-                            <label for="description" class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Course Description (Turkish)' : 'Ders Açıklaması (Türkçe)' ?></label>
-                            <textarea class="form-control" id="description" name="description" rows="2" placeholder="<?= htmlspecialchars(t('admin.dashboard.modal_description_placeholder')) ?>" autocomplete="off"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description_en" class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Course Description (English)' : 'Ders Açıklaması (İngilizce)' ?></label>
-                            <textarea class="form-control" id="description_en" name="description_en" rows="2" placeholder="Write description in English..." autocomplete="off"></textarea>
+                            <label for="description" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.dashboard.modal_description')) ?></label>
+                            <textarea class="form-control" id="description" name="description" rows="3" placeholder="<?= htmlspecialchars(t('admin.dashboard.modal_description_placeholder')) ?>" autocomplete="off"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
