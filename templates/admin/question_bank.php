@@ -703,10 +703,19 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                         <div style="flex:1; height:1px; background:var(--divider)"></div>
                     </div>
 
-                    <!-- Manual Add Button -->
-                    <button class="btn-manual w-100 mt-3" onclick="openManualModal()">
-                        + <?= htmlspecialchars(t('admin.qbank.add_manual')) ?>
-                    </button>
+                    <!-- Manual Add and JSON Import Buttons Side-by-Side -->
+                    <div class="row g-2 mt-3">
+                        <div class="col-6">
+                            <button class="btn-manual w-100 mt-0 py-2 px-1 text-center" style="font-size:0.85rem;" onclick="openManualModal()">
+                                + <?= htmlspecialchars(t('admin.qbank.add_manual')) ?>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn-manual w-100 mt-0 py-2 px-1 text-center" style="font-size:0.85rem; background: var(--bg-color); color: var(--text-main); border: 1.5px solid var(--input-border);" onclick="openImportModal()">
+                                📥 <?= $locale === 'en' ? 'Import JSON' : 'JSON İçe Aktar' ?>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1213,7 +1222,125 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             event.target.value = '';
         }
     }
+
+    // --- JSON Import Modal Actions ---
+    function openImportModal() {
+        document.getElementById('import-modal').classList.add('open');
+        document.getElementById('modal-json-file').value = '';
+        document.getElementById('import-source-title').value = document.getElementById('source-title').value || '';
+        document.getElementById('modal-file-text').textContent = '<?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?>';
+    }
+
+    function closeImportModal() {
+        document.getElementById('import-modal').classList.remove('open');
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function handleModalFileSelect(input) {
+        const text = document.getElementById('modal-file-text');
+        if (input.files && input.files[0]) {
+            text.innerHTML = '<strong>✅ ' + escapeHtml(input.files[0].name) + '</strong>';
+        } else {
+            text.textContent = '<?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?>';
+        }
+    }
+
+    async function importBankQuestions() {
+        const fileInput = document.getElementById('modal-json-file');
+        const sourceTitleInput = document.getElementById('import-source-title');
+
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert("<?= $locale === 'en' ? 'Please select a .json file.' : 'Lütfen bir .json dosyası seçin.' ?>");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('json_file', fileInput.files[0]);
+        formData.append('source_title', sourceTitleInput.value.trim());
+
+        try {
+            const res = await fetch(<?= json_encode(eduqr_path('/admin/question-bank/import-json')) ?>, {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                const msg = "<?= $locale === 'en' ? 'Successfully imported ' : 'Başarıyla ' ?>" + data.count + 
+                            "<?= $locale === 'en' ? ' questions.' : ' soru aktarıldı.' ?>" +
+                            (data.skipped > 0 ? " (<?= $locale === 'en' ? 'Skipped: ' : 'Geçilen: ' ?>" + data.skipped + ")" : "");
+                alert(msg);
+                location.reload();
+            } else {
+                alert("Error: " + (data.error || "<?= t('admin.session.alert_submit_failed') ?>"));
+            }
+        } catch (e) {
+            alert("<?= t('admin.session.alert_connection_error') ?>");
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Wire drag-drop zone inside import modal
+        const modalDropZone = document.getElementById('modal-file-drop-zone');
+        if (modalDropZone) {
+            modalDropZone.addEventListener('click', () => {
+                document.getElementById('modal-json-file').click();
+            });
+            modalDropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                modalDropZone.style.borderColor = 'var(--primary)';
+                modalDropZone.style.background = 'rgba(59, 130, 246, 0.05)';
+            });
+            modalDropZone.addEventListener('dragleave', () => {
+                modalDropZone.style.borderColor = '';
+                modalDropZone.style.background = '';
+            });
+            modalDropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                modalDropZone.style.borderColor = '';
+                modalDropZone.style.background = '';
+                const fileInput = document.getElementById('modal-json-file');
+                fileInput.files = e.dataTransfer.files;
+                handleModalFileSelect(fileInput);
+            });
+        }
+    });
 </script>
+
+<!-- JSON Import Modal Overlay -->
+<div id="import-modal" class="manual-modal-overlay" onclick="if(event.target===this) closeImportModal()">
+    <div class="manual-modal">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 style="font-weight:700; margin:0;"><?= $locale === 'en' ? 'Import from JSON' : 'JSON Dosyasından Aktar' ?></h4>
+            <button class="btn-modal-close" style="font-size:1.5rem; line-height:1; padding:2px 8px; border:none; background:transparent;" onclick="closeImportModal()">×</button>
+        </div>
+        
+        <!-- File Upload Option -->
+        <div class="mb-3">
+            <label class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Select JSON File' : 'JSON Dosyası Seçin' ?></label>
+            <div class="file-drop-zone" id="modal-file-drop-zone" style="border: 2px dashed var(--input-border); border-radius:12px; padding:30px; text-align:center; cursor:pointer; background:var(--input-bg);">
+                <input type="file" id="modal-json-file" accept=".json" style="display:none;" onchange="handleModalFileSelect(this)">
+                <div class="file-drop-icon" style="font-size:2.5rem; margin-bottom:6px;">📄</div>
+                <div class="file-drop-text" id="modal-file-text" style="font-size:0.85rem; color:var(--text-muted);"><?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?></div>
+            </div>
+        </div>
+
+        <!-- Optional Source Tag -->
+        <div class="mb-4">
+            <label for="import-source-title" class="card-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Source Tag (Optional)' : 'Kaynak Etiketi (Opsiyonel)' ?></label>
+            <input type="text" id="import-source-title" class="form-input w-100" style="width:100%; border: 1.5px solid var(--input-border); border-radius:10px; padding:10px 14px; background:var(--input-bg); color:var(--text-main);" placeholder="e.g. Java, Python">
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+            <button type="button" class="btn-modal-close" style="padding: 8px 18px;" onclick="closeImportModal()"><?= $locale === 'en' ? 'Cancel' : 'İptal' ?></button>
+            <button type="button" onclick="importBankQuestions()" class="btn-generate" style="width:auto; padding:8px 24px; font-size:0.875rem; border-radius:10px; background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer;"><?= $locale === 'en' ? 'Import' : 'İçe Aktar' ?></button>
+        </div>
+    </div>
+</div>
 
 <!-- PDF.js for reading PDF files -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
