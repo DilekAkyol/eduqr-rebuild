@@ -234,8 +234,10 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                         showState('answered');
                     } else {
                         // Voted false, render options
-                        currentActiveQuestionId = data.question.id;
-                        renderQuestion(data.question);
+                        if (currentActiveQuestionId !== data.question.id) {
+                            currentActiveQuestionId = data.question.id;
+                            renderQuestion(data.question);
+                        }
                         showState('question');
                     }
                 } else {
