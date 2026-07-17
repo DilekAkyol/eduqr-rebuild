@@ -34,6 +34,16 @@ final class ReportController
         }
 
         $sessionId = (int) $params['id'];
+
+        $db = \EduQR\Support\Database::connect();
+        // Runtime schema check for ai_analysis column
+        try {
+            $db->query("SELECT ai_analysis FROM sessions LIMIT 1");
+        } catch (\PDOException $e) {
+            // Column does not exist, add it
+            $db->exec("ALTER TABLE sessions ADD COLUMN ai_analysis TEXT NULL");
+        }
+
         $session = $this->sessionRepo->findById($sessionId);
         if ($session === null) {
             http_response_code(404);
@@ -185,6 +195,134 @@ final class ReportController
         $stmt->execute(['id' => $sessionId]);
 
         header('Location: ' . eduqr_path('/admin/courses/' . $courseId . '?deleted=1'));
+        exit;
+    }
+
+    /**
+     * POST /admin/sessions/{id}/ai-analysis
+     */
+    public function generateAiAnalysis(array $params): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $user = AuthService::user();
+        if ($user === null) {
+            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            exit;
+        }
+
+        $sessionId = (int)$params['id'];
+
+        $db = \EduQR\Support\Database::connect();
+        // Runtime schema check for ai_analysis column
+        try {
+            $db->query("SELECT ai_analysis FROM sessions LIMIT 1");
+        } catch (\PDOException $e) {
+            // Column does not exist, add it
+            $db->exec("ALTER TABLE sessions ADD COLUMN ai_analysis TEXT NULL");
+        }
+
+        $session = $this->sessionRepo->findById($sessionId);
+        if ($session === null) {
+            echo json_encode(['success' => false, 'error' => 'Oturum bulunamadı.']);
+            exit;
+        }
+
+        $course = $this->courseRepo->findByIdAndUserId((int)$session['course_id'], $user['id']);
+        if ($course === null) {
+            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            exit;
+        }
+
+        $questions = $this->questionRepo->findBySessionId($sessionId);
+        
+        // Build the text description of questions and student answers
+        $analysisPayload = "Ders: " . $course['title'] . "\nOturum: " . $session['title'] . "\n\nSoru ve Cevap Dağılımları:\n";
+        
+        foreach ($questions as $idx => $q) {
+            $num = $idx + 1;
+            $analysisPayload .= "Soru {$num}: " . $q['question_text'] . " (Tip: " . ($q['type'] === 'open_ended' ? 'Açık Uçlu' : 'Çoktan Seçmeli') . ")\n";
+            
+            if ($q['type'] === 'open_ended') {
+                $answers = $this->answerRepo->getAnswersForQuestion((int)$q['id']);
+                $analysisPayload .= "Öğrenci Cevapları:\n";
+                if (empty($answers)) {
+                    $analysisPayload .= "- Cevap yok.\n";
+                } else {
+                    foreach ($answers as $ans) {
+                        $analysisPayload .= "- " . $ans['answer_value'] . "\n";
+                    }
+                }
+            } else {
+                $results = $this->answerRepo->getResultsForQuestion((int)$q['id']);
+                $analysisPayload .= "Şık Dağılımı: ";
+                $parts = [];
+                foreach ($results as $opt => $count) {
+                    $parts[] = "{$opt}: {$count} öğrenci";
+                }
+                $analysisPayload .= implode(', ', $parts) . "\n";
+                if (!empty($q['correct_answer'])) {
+                    $analysisPayload .= "Doğru Cevap: " . $q['correct_answer'] . "\n";
+                }
+            }
+            $analysisPayload .= "\n";
+        }
+
+        $apiKey = \EduQR\Config::get('GEMINI_API_KEY', '');
+        if ($apiKey === '') {
+            echo json_encode(['success' => false, 'error' => 'GEMINI_API_KEY .env dosyasında tanımlanmamış.']);
+            exit;
+        }
+
+        $prompt = "Aşağıda bir sınıfın eduQR platformu üzerinden gerçekleştirdiği canlı oturuma dair ders adı, oturum başlığı, sorular ve öğrencilerin verdiği cevap/şık dağılımları yer almaktadır.\n\n" .
+                  "Bu verileri pedagojik açıdan derinlemesine analiz et:\n" .
+                  "1. Sınıfın genel başarı durumunu kısaca özetle.\n" .
+                  "2. Öğrencilerin en çok zorlandığı soruları ve konuları tespit et.\n" .
+                  "3. Sıklıkla yapılan hataları ve yanlış cevapların/şıkların olası nedenlerini analiz et.\n" .
+                  "4. Öğretmene sınıfın başarısını artırması için pratik, uygulanabilir kazanım önerileri (hangi konular tekrar edilmeli, nelere dikkat edilmeli) sun.\n\n" .
+                  "Yanıtını tamamen Türkçe ve markdown formatında (başlıklar, kalın yazılar, listeler kullanarak) düzenle. Herhangi bir kod bloğu (```) içine alma, doğrudan okunabilir markdown dön.\n\n" .
+                  "Veriler:\n" . $analysisPayload;
+
+        $geminiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={$apiKey}";
+        $postData = [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt]
+                    ]
+                ]
+            ]
+        ];
+
+        $ch = curl_init($geminiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+        $response = curl_exec($ch);
+        $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpStatus !== 200) {
+            $errData = json_decode((string)$response, true);
+            $errMsg = $errData['error']['message'] ?? 'Bilinmeyen API hatası';
+            echo json_encode(['success' => false, 'error' => 'Gemini API Hatası: ' . $errMsg]);
+            exit;
+        }
+
+        $geminiData = json_decode((string)$response, true);
+        $rawText = $geminiData['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+        if (trim($rawText) === '') {
+            echo json_encode(['success' => false, 'error' => 'Gemini boş bir yanıt döndürdü.']);
+            exit;
+        }
+
+        // Save to database
+        $stmt = $db->prepare("UPDATE sessions SET ai_analysis = :ai_analysis WHERE id = :id");
+        $stmt->execute(['ai_analysis' => $rawText, 'id' => $sessionId]);
+
+        echo json_encode(['success' => true, 'analysis' => $rawText], JSON_UNESCAPED_UNICODE);
         exit;
     }
 }

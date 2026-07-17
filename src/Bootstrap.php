@@ -149,6 +149,11 @@ final class Bootstrap
             (new \EduQR\Controllers\ReportController())->anonymize($p);
         });
 
+        $router->post('/eduqr-rebuild/public/admin/sessions/{id}/ai-analysis', function (array $p): void {
+            \EduQR\Middleware\AuthMiddleware::handle();
+            (new \EduQR\Controllers\ReportController())->generateAiAnalysis($p);
+        });
+
         $router->post('/eduqr-rebuild/public/admin/sessions/{id}/close', function (array $p): void {
             \EduQR\Middleware\AuthMiddleware::handle();
             (new \EduQR\Controllers\SessionController())->close($p);

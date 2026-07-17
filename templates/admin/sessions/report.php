@@ -623,6 +623,32 @@ $participationRate = $totalPossibleAnswers > 0
                     <p class="text-muted small mb-0"><?= $totalParticipants ?> <?= htmlspecialchars(t('admin.report.participant_prefix')) ?></p>
                 </div>
 
+                <!-- AI Assistant Card -->
+                <div class="card-custom mb-4" id="ai-analysis-card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(59, 130, 246, 0.04) 100%); border: 1.5px solid rgba(139, 92, 246, 0.15) !important;">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span style="font-size: 1.5rem;">🤖</span>
+                        <h4 class="fw-bold mb-0" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.1rem;"><?= $locale === 'en' ? 'AI Performance Analysis' : 'Yapay Zeka Hata & Analizi' ?></h4>
+                    </div>
+                    
+                    <div id="ai-analysis-content" class="small text-muted lh-base mb-3">
+                        <?php if (empty($session['ai_analysis'])): ?>
+                            <p class="mb-0"><?= $locale === 'en' ? 'No analysis has been generated for this session yet. Let Gemini analyze student performance, find common mistakes, and recommend learning outcomes!' : 'Bu oturum için henüz yapay zeka analizi üretilmemiş. Gemini ile öğrenci performansını, yapılan ortak hataları ve pedagojik kazanımları analiz edin!' ?></p>
+                        <?php else: ?>
+                            <div id="ai-markdown-rendered">
+                                <!-- Markdown content will be rendered here on load -->
+                                <textarea id="ai-raw-markdown" style="display:none;"><?= htmlspecialchars($session['ai_analysis']) ?></textarea>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="no-print">
+                        <button type="button" id="btn-generate-ai" onclick="generateAiAnalysis()" class="btn btn-sm text-white w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); border: none; border-radius: 10px; font-weight: 600;">
+                            <span id="ai-btn-icon">✨</span>
+                            <span id="ai-btn-label"><?= empty($session['ai_analysis']) ? ($locale === 'en' ? 'Generate AI Analysis' : 'Yapay Zeka Analizi Üret') : ($locale === 'en' ? 'Regenerate Analysis' : 'Analizi Yenile') ?></span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="card-custom no-print">
                     <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('admin.report.security_title')) ?></h4>
                     <p class="text-muted small mb-0"><?= htmlspecialchars(t('admin.report.security_desc')) ?></p>
@@ -698,7 +724,45 @@ $participationRate = $totalPossibleAnswers > 0
         document.addEventListener('DOMContentLoaded', () => {
             applyTheme(document.documentElement.getAttribute('data-theme') || 'light'); // reports default light
 
+            // Render existing markdown if available
+            const rawMarkdownEl = document.getElementById('ai-raw-markdown');
+            if (rawMarkdownEl) {
+                const rawMarkdown = rawMarkdownEl.value;
+                document.getElementById('ai-markdown-rendered').innerHTML = marked.parse(rawMarkdown);
+            }
         });
+
+        async function generateAiAnalysis() {
+            const btn = document.getElementById('btn-generate-ai');
+            const icon = document.getElementById('ai-btn-icon');
+            const label = document.getElementById('ai-btn-label');
+
+            btn.disabled = true;
+            icon.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            label.textContent = '<?= $locale === 'en' ? 'Analyzing...' : 'Analiz ediliyor...' ?>';
+
+            try {
+                const res = await fetch(<?= json_encode(eduqr_path('/admin/sessions/' . $session['id'] . '/ai-analysis')) ?>, {
+                    method: 'POST'
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const contentDiv = document.getElementById('ai-analysis-content');
+                    contentDiv.innerHTML = `<div id="ai-markdown-rendered"></div>`;
+                    document.getElementById('ai-markdown-rendered').innerHTML = marked.parse(data.analysis);
+                    label.textContent = '<?= $locale === 'en' ? 'Regenerate Analysis' : 'Analizi Yenile' ?>';
+                } else {
+                    alert("Error: " + (data.error || "<?= $locale === 'en' ? 'Analysis failed.' : 'Analiz başarısız.' ?>"));
+                }
+            } catch (e) {
+                alert("<?= $locale === 'en' ? 'Connection error.' : 'Bağlantı hatası.' ?>");
+            } finally {
+                btn.disabled = false;
+                icon.innerHTML = '✨';
+            }
+        }
     </script>
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
 </html>
