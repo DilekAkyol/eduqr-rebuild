@@ -431,4 +431,101 @@ PROMPT;
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
+    /**
+     * GET /admin/question-bank/{id}
+     */
+    public function getQuestion(array $params): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $user = AuthService::user();
+        if ($user === null) {
+            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            exit;
+        }
+
+        $id = (int) $params['id'];
+        $q = $this->bankRepo->findById($id, (int)$user['id']);
+
+        if ($q === null) {
+            echo json_encode(['success' => false, 'error' => 'Soru bulunamadı.']);
+            exit;
+        }
+
+        echo json_encode(['success' => true, 'question' => $q], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    /**
+     * POST /admin/question-bank/{id}/update
+     */
+    public function update(array $params): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $user = AuthService::user();
+        if ($user === null) {
+            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            exit;
+        }
+
+        $id = (int) $params['id'];
+        $q = $this->bankRepo->findById($id, (int)$user['id']);
+        if ($q === null) {
+            echo json_encode(['success' => false, 'error' => 'Soru bulunamadı.']);
+            exit;
+        }
+
+        // Post verilerini oku
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+        $text = trim((string)($input['question_text'] ?? ''));
+        $type = trim((string)($input['type'] ?? 'multiple_choice'));
+        $sourceTitle = trim((string)($input['source_title'] ?? '')) ?: null;
+
+        if ($text === '') {
+            echo json_encode(['success' => false, 'error' => 'Soru metni boş olamaz.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $options = null;
+        $correctAnswer = null;
+
+        if ($type === 'multiple_choice') {
+            $rawOptions = $input['options'] ?? [];
+            if (is_array($rawOptions)) {
+                $options = array_values(array_filter(array_map('trim', $rawOptions), function ($val) {
+                    return $val !== '';
+                }));
+            }
+            if (empty($options) || count($options) < 2) {
+                echo json_encode(['success' => false, 'error' => 'Çoktan seçmeli sorular en az 2 şık içermelidir.'], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+            $correctAnswer = trim((string)($input['correct_answer'] ?? ''));
+            if ($correctAnswer === '') {
+                echo json_encode(['success' => false, 'error' => 'Doğru cevap belirtilmelidir.'], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+        }
+
+        $updated = $this->bankRepo->update(
+            $id,
+            (int)$user['id'],
+            $text,
+            $type,
+            $options,
+            $correctAnswer,
+            $sourceTitle
+        );
+
+        if ($updated) {
+            echo json_encode(['success' => true, 'message' => 'Soru başarıyla güncellendi.'], JSON_UNESCAPED_UNICODE);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Güncelleme başarısız oldu.'], JSON_UNESCAPED_UNICODE);
+        }
+        exit;
+    }
 }

@@ -221,6 +221,16 @@ final class Bootstrap
             (new \EduQR\Controllers\QuestionBankController())->deleteQuestion($p);
         });
 
+        $router->get('/eduqr-rebuild/public/admin/question-bank/{id}', function (array $p): void {
+            \EduQR\Middleware\AuthMiddleware::handle();
+            (new \EduQR\Controllers\QuestionBankController())->getQuestion($p);
+        });
+
+        $router->post('/eduqr-rebuild/public/admin/question-bank/{id}/update', function (array $p): void {
+            \EduQR\Middleware\AuthMiddleware::handle();
+            (new \EduQR\Controllers\QuestionBankController())->update($p);
+        });
+
         // ── Öğrenci Rotaları ────────────────────────────────────────────────
         $router->get('/eduqr-rebuild/public/join/{short_code}', function (array $p): void {
             (new \EduQR\Controllers\JoinController())->showJoin($p);

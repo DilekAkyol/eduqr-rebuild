@@ -429,6 +429,21 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
         }
         .bank-question-item .q-delete:hover { color: var(--delete-color); background: rgba(239,68,68,0.08); }
 
+        .bank-question-item .q-edit {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            line-height: 1;
+            margin-right: 2px;
+        }
+        .bank-question-item .q-edit:hover { color: var(--accent); background: rgba(99,102,241,0.08); }
+
         /* ── Empty State ─────────────────────────────────────────── */
         .empty-state {
             text-align: center;
@@ -774,7 +789,10 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                                         </span>
                                     </div>
                                 </div>
-                                <button class="q-delete" onclick="deleteQuestion(<?= (int)$q['id'] ?>, event)" title="Sil">🗑</button>
+                                <div class="d-flex align-items-center gap-1 no-print">
+                                    <button class="q-edit" onclick="openEditModal(<?= (int)$q['id'] ?>, event)" title="Düzenle">✏️</button>
+                                    <button class="q-delete" onclick="deleteQuestion(<?= (int)$q['id'] ?>, event)" title="Sil">🗑</button>
+                                </div>
                             </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -865,6 +883,52 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             </button>
             <button class="btn-generate" onclick="submitManual()" style="box-shadow:none; padding:9px 20px;">
                 ✚ <?= htmlspecialchars(t('admin.qbank.manual_add_btn')) ?>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ EDIT QUESTION MODAL ══════════════════════════════════════ -->
+<div class="manual-modal-overlay" id="edit-modal-overlay" onclick="closeEditModal(event)">
+    <div class="manual-modal">
+        <h4 class="mb-2" style="font-size:1.1rem; font-weight:700;">✏️ <?= $locale === 'tr' ? 'Soruyu Düzenle' : 'Edit Question' ?></h4>
+        <p class="mb-4" style="font-size:0.875rem; color:var(--text-muted);"><?= $locale === 'tr' ? 'Soru bankasındaki soruyu güncelleyin.' : 'Update the question in the question bank.' ?></p>
+
+        <input type="hidden" id="edit-q-id">
+
+        <div class="mb-3">
+            <div class="card-label"><?= $locale === 'tr' ? 'Soru Tipi' : 'Question Type' ?></div>
+            <select id="edit-q-type" class="form-select-el" onchange="toggleEditQuestionFields()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); border-radius:10px; width:100%; padding:0.6rem 0.8rem; font-size:0.875rem;">
+                <option value="multiple_choice"><?= $locale === 'tr' ? 'Çoktan Seçmeli' : 'Multiple Choice' ?></option>
+                <option value="open_ended"><?= $locale === 'tr' ? 'Açık Uçlu' : 'Open-Ended' ?></option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_question')) ?></div>
+            <textarea id="edit-q-text" class="form-textarea" style="min-height:80px;" placeholder="..."></textarea>
+        </div>
+        <div id="edit-mc-fields">
+            <div class="mb-3">
+                <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_options')) ?></div>
+                <textarea id="edit-q-options" class="form-textarea" style="min-height:90px;"
+                    placeholder="<?= $locale === 'tr' ? "Her satıra bir seçenek yazın" : "Write one option per line" ?>"></textarea>
+            </div>
+            <div class="mb-3">
+                <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_correct')) ?></div>
+                <input type="text" id="edit-q-correct" class="form-input" placeholder="e.g., A">
+            </div>
+        </div>
+        <div class="mb-4">
+            <div class="card-label"><?= $locale === 'tr' ? 'Kaynak Etiketi (Opsiyonel)' : 'Source Tag (Optional)' ?></div>
+            <input type="text" id="edit-q-source" class="form-input" placeholder="e.g., Java">
+        </div>
+
+        <div class="d-flex gap-3 justify-content-end">
+            <button class="btn-modal-close" onclick="closeEditModalDirect()">
+                <?= htmlspecialchars(t('admin.dashboard.cancel')) ?>
+            </button>
+            <button class="btn-generate" onclick="submitEdit()" style="box-shadow:none; padding:9px 20px;">
+                💾 <?= $locale === 'tr' ? 'Kaydet' : 'Save' ?>
             </button>
         </div>
     </div>
@@ -1168,6 +1232,86 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                 document.getElementById('manual-q-correct').value = '';
             } else {
                 showToast(data.error || 'Ekleme başarısız.', 'error');
+            }
+        } catch(e) {
+            showToast('Hata: ' + e.message, 'error');
+        }
+    }
+
+    // ── Edit Modal Actions ───────────────────────────────────────
+    async function openEditModal(id, event) {
+        if (event) event.stopPropagation();
+
+        try {
+            const res = await fetch(deleteBaseUrl + id);
+            const data = await res.json();
+            if (data.success && data.question) {
+                const q = data.question;
+                document.getElementById('edit-q-id').value = q.id;
+                document.getElementById('edit-q-text').value = q.question_text;
+                document.getElementById('edit-q-type').value = q.type;
+                document.getElementById('edit-q-source').value = q.source_title || '';
+
+                if (q.type === 'multiple_choice') {
+                    document.getElementById('edit-q-options').value = Array.isArray(q.options) ? q.options.join('\n') : '';
+                    document.getElementById('edit-q-correct').value = q.correct_answer || '';
+                } else {
+                    document.getElementById('edit-q-options').value = '';
+                    document.getElementById('edit-q-correct').value = '';
+                }
+
+                toggleEditQuestionFields();
+                document.getElementById('edit-modal-overlay').classList.add('open');
+            } else {
+                showToast(data.error || 'Soru yüklenemedi.', 'error');
+            }
+        } catch (e) {
+            showToast('Hata: ' + e.message, 'error');
+        }
+    }
+
+    function closeEditModal(event) {
+        if (event.target === document.getElementById('edit-modal-overlay')) closeEditModalDirect();
+    }
+
+    function closeEditModalDirect() {
+        document.getElementById('edit-modal-overlay').classList.remove('open');
+    }
+
+    function toggleEditQuestionFields() {
+        const type = document.getElementById('edit-q-type').value;
+        const mcFields = document.getElementById('edit-mc-fields');
+        if (type === 'open_ended') {
+            mcFields.style.display = 'none';
+        } else {
+            mcFields.style.display = 'block';
+        }
+    }
+
+    async function submitEdit() {
+        const id = document.getElementById('edit-q-id').value;
+        const text = document.getElementById('edit-q-text').value.trim();
+        if (!text) { showToast(locale === 'tr' ? 'Soru metni boş olamaz.' : 'Question text cannot be empty.', 'error'); return; }
+
+        const type = document.getElementById('edit-q-type').value;
+        const rawOptions = type === 'multiple_choice' ? document.getElementById('edit-q-options').value.trim() : '';
+        const options = (type === 'multiple_choice' && rawOptions) ? rawOptions.split('\n').map(o => o.trim()).filter(o => o !== '') : null;
+        const correct = type === 'multiple_choice' ? (document.getElementById('edit-q-correct').value.trim() || null) : null;
+        const sourceTitle = document.getElementById('edit-q-source').value.trim();
+
+        try {
+            const res = await fetch(deleteBaseUrl + id + '/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question_text: text, options, correct_answer: correct, source_title: sourceTitle, type })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(locale === 'tr' ? 'Soru güncellendi!' : 'Question updated!', 'success');
+                closeEditModalDirect();
+                location.reload();
+            } else {
+                showToast(data.error || 'Güncelleme başarısız.', 'error');
             }
         } catch(e) {
             showToast('Hata: ' + e.message, 'error');
