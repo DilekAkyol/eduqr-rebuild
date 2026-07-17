@@ -360,27 +360,6 @@ $participationRate = $totalPossibleAnswers > 0
             border-color: #ef4444;
         }
 
-        .btn-export-session {
-            background: transparent;
-            border: 1.5px solid var(--primary);
-            color: var(--primary);
-            font-weight: 600;
-            padding: 0.5rem 1.2rem;
-            border-radius: 50px;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        .btn-export-session:hover {
-            background-color: rgba(59, 130, 246, 0.08);
-            color: #2563eb;
-            border-color: #2563eb;
-        }
-
         .text-muted {
             color: var(--text-muted) !important;
         }
@@ -546,16 +525,6 @@ $participationRate = $totalPossibleAnswers > 0
         <div class="actions-card mb-4 no-print">
             <h5><?= $locale === 'en' ? 'Actions' : 'İşlemler' ?></h5>
             <div class="d-flex flex-wrap gap-2 align-items-center">
-                <!-- Export CSV Button -->
-                <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report/csv') ?>" class="btn-export-session">
-                    📥 <?= $locale === 'en' ? 'Download CSV' : 'CSV Raporu İndir' ?>
-                </a>
-
-                <!-- Export PDF Button -->
-                <button type="button" onclick="window.print()" class="btn-export-session">
-                    📄 <?= $locale === 'en' ? 'Download PDF' : 'PDF Raporu İndir' ?>
-                </button>
-
                 <!-- Anonymize Session Form -->
                 <?php if (!$session['is_anonymized']): ?>
                 <form action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/anonymize') ?>" method="POST" onsubmit="return confirm('<?= $locale === 'en' ? 'Are you sure you want to permanently anonymize this session\'s participants?' : 'Bu oturumdaki tüm katılımcı isimlerini kalıcı olarak anonimleştirmek istediğinize emin misiniz?' ?>');">
