@@ -81,6 +81,11 @@ $placeholder_email = ($locale === 'en') ? 'demo@example.org' : 'örnek@eduqr.loc
             transition: all 0.3s;
         }
 
+        .form-control::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 1 !important;
+        }
+
         .form-control:focus {
             background: var(--input-bg) !important;
             border-color: #3b82f6 !important;

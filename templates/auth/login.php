@@ -318,6 +318,11 @@ $placeholder_email = ($locale === 'en') ? 'demo@example.org' : 'örnek@eduqr.loc
             transition: all 0.3s;
         }
 
+        .form-control::placeholder {
+            color: var(--text-muted) !important;
+            opacity: 1 !important;
+        }
+
         .form-control:focus {
             border-color: var(--input-focus-border) !important;
             box-shadow: 0 0 0 4px var(--input-focus-glow) !important;

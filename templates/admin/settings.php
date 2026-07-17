@@ -373,7 +373,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
         }
         .form-input-custom::placeholder {
             color: var(--text-muted) !important;
-            opacity: 0.75 !important;
+            opacity: 1 !important;
         }
         .form-input-custom option, select option {
             background-color: var(--card-bg) !important;
