@@ -169,7 +169,7 @@ $placeholder_email = ($locale === 'en') ? 'demo@example.org' : 'örnek@eduqr.loc
             </div>
             <div class="mb-4">
                 <label for="password" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('auth.login.password')) ?></label>
-                <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+                <input type="password" class="form-control" id="password" name="password" required placeholder="<?= htmlspecialchars(t('auth.login.password_placeholder')) ?>">
             </div>
             <button type="submit" class="btn btn-primary w-100 mb-3"><?= htmlspecialchars(t('auth.register.submit')) ?></button>
         </form>

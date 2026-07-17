@@ -7,6 +7,7 @@
     "auth.login.title": "Instructor Login",
     "auth.login.email": "Email",
     "auth.login.password": "Password",
+    "auth.login.password_placeholder": "Enter your password",
     "auth.login.submit": "Login",
     "auth.login.invalid": "Invalid email or password.",
     "auth.login.invalid_email_format": "Invalid email address format.",

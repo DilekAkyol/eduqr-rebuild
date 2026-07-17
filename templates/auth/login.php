@@ -598,7 +598,7 @@ $placeholder_email = ($locale === 'en') ? 'demo@example.org' : 'örnek@eduqr.loc
                                 <span class="input-group-text border-end-0" style="border-top-left-radius: 12px; border-bottom-left-radius: 12px;">
                                     <i class="bi bi-lock"></i>
                                 </span>
-                                <input type="password" class="form-control border-start-0 border-end-0" id="password" name="password" required placeholder="••••••••" style="padding: 0.8rem 1rem;">
+                                <input type="password" class="form-control border-start-0 border-end-0" id="password" name="password" required placeholder="<?= htmlspecialchars(t('auth.login.password_placeholder')) ?>" style="padding: 0.8rem 1rem;">
                                 <button class="btn btn-outline-secondary border-start-0" type="button" id="toggle-password-btn" onclick="togglePasswordVisibility()" style="border-top-right-radius: 12px; border-bottom-right-radius: 12px;">
                                     <i class="bi bi-eye" id="password-eye-icon"></i>
                                 </button>
@@ -681,7 +681,7 @@ $placeholder_email = ($locale === 'en') ? 'demo@example.org' : 'örnek@eduqr.loc
                     <label for="new-password" class="form-label text-muted small fw-semibold text-uppercase d-block mb-2">
                         <?= htmlspecialchars(t('auth.login.forgot_password_new_password_label')) ?>
                     </label>
-                    <input type="password" class="form-control" id="new-password" required placeholder="••••••••" style="padding: 0.8rem 1rem; border-radius: 12px;">
+                    <input type="password" class="form-control" id="new-password" required placeholder="<?= htmlspecialchars(t('auth.login.password_placeholder')) ?>" style="padding: 0.8rem 1rem; border-radius: 12px;">
                 </div>
 
                 <!-- Confirm Password Input -->
@@ -689,7 +689,7 @@ $placeholder_email = ($locale === 'en') ? 'demo@example.org' : 'örnek@eduqr.loc
                     <label for="confirm-password" class="form-label text-muted small fw-semibold text-uppercase d-block mb-2">
                         <?= htmlspecialchars(t('auth.login.forgot_password_confirm_password_label')) ?>
                     </label>
-                    <input type="password" class="form-control" id="confirm-password" required placeholder="••••••••" style="padding: 0.8rem 1rem; border-radius: 12px;">
+                    <input type="password" class="form-control" id="confirm-password" required placeholder="<?= htmlspecialchars(t('auth.login.password_placeholder')) ?>" style="padding: 0.8rem 1rem; border-radius: 12px;">
                 </div>
                 
                 <button type="submit" id="confirm-reset-btn" class="btn btn-login-submit w-100">

@@ -7,6 +7,7 @@
     "auth.login.title": "Öğretmen Girişi",
     "auth.login.email": "E-posta",
     "auth.login.password": "Şifre",
+    "auth.login.password_placeholder": "Şifrenizi girin",
     "auth.login.submit": "Giriş Yap",
     "auth.login.invalid": "E-posta veya şifre hatalı.",
     "auth.login.invalid_email_format": "E-posta adresi geçersiz formatta.",
