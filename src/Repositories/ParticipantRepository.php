@@ -19,7 +19,7 @@ final class ParticipantRepository
     public function findBySessionIdAndNickname(int $sessionId, string $nickname): ?array
     {
         $stmt = $this->db->prepare(
-            "SELECT * FROM participants WHERE session_id = :session_id AND nickname = :nickname LIMIT 1"
+            "SELECT * FROM participants WHERE session_id = :session_id AND LOWER(nickname) = LOWER(:nickname) LIMIT 1"
         );
         $stmt->execute([
             'session_id' => $sessionId,

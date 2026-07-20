@@ -136,6 +136,7 @@ final class JoinController
         }
 
         $nickname = trim($_POST['nickname'] ?? '');
+        $locale   = \EduQR\I18n\I18nService::getLocale();
         if ($nickname === '') {
             $nickname = 'anon-' . substr($deviceCookie, 0, 8);
         }
@@ -147,6 +148,16 @@ final class JoinController
             $updateStmt = \EduQR\Support\Database::connect()->prepare("UPDATE participants SET nickname = :nickname WHERE id = :id");
             $updateStmt->execute(['nickname' => $nickname, 'id' => $participantId]);
         } else {
+            // Başka bir cihaz bu rumuzu daha önce aldı mı? (case-insensitive, FR-42)
+            $takenBy = $this->participantRepo->findBySessionIdAndNickname((int)$session['id'], $nickname);
+            if ($takenBy !== null) {
+                $error = $locale === 'en'
+                    ? 'This nickname is already taken! Please choose a different one.'
+                    : 'Bu rumuz zaten alınmış! Lütfen farklı bir rumuz seçin.';
+                include __DIR__ . '/../../templates/student/join.php';
+                exit;
+            }
+
             $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
             $participantId = $this->participantRepo->create((int)$session['id'], $nickname, $deviceCookie, $userAgent);
         }
