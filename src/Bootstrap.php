@@ -249,6 +249,10 @@ final class Bootstrap
             (new \EduQR\Controllers\JoinController())->showWait($p);
         });
 
+        $router->post('/eduqr-rebuild/public/join/{short_code}/wait', function (array $p): void {
+            (new \EduQR\Controllers\JoinController())->submitWaitAnswer($p);
+        });
+
         // ── Öğrenci API Rotaları ────────────────────────────────────────────
         $router->get('/eduqr-rebuild/public/api/v1/sessions/{short_code}/active-question', function (array $p): void {
             (new \EduQR\Controllers\Api\PublicQuestionController())->activeQuestion($p['short_code']);

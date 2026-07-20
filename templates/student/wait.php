@@ -11,6 +11,9 @@ $locale = \EduQR\I18n\I18nService::getLocale();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <noscript>
+        <meta http-equiv="refresh" content="5">
+    </noscript>
     
     <!-- Theme Fast-Init script to prevent white flash -->
     <script>
@@ -21,6 +24,9 @@ $locale = \EduQR\I18n\I18nService::getLocale();
     </script>
     
     <style>
+        #js-container {
+            display: none;
+        }
         :root {
             /* Light Mode Variables */
             --bg-color: #f8fafc;
@@ -163,30 +169,79 @@ $locale = \EduQR\I18n\I18nService::getLocale();
     </div>
 
     <div class="wait-card text-center" id="card-content">
-        <!-- Default State: Waiting for question -->
-        <div id="wait-state">
-            <div class="glow-spinner"></div>
-            <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.join.waiting')) ?></h4>
-            <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.join.waiting_desc')) ?></p>
-        </div>
+        <noscript>
+            <?php if ($activeQuestion === null): ?>
+                <!-- Wait State -->
+                <div>
+                    <div class="glow-spinner" style="animation: none; box-shadow: none; border-color: #3b82f6;"></div>
+                    <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.join.waiting')) ?></h4>
+                    <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.join.waiting_desc')) ?></p>
+                    <a href="" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= $locale === 'en' ? 'Refresh' : 'Sayfayı Yenile' ?></a>
+                </div>
+            <?php else: ?>
+                <?php if ($hasAnswered): ?>
+                    <!-- Answered State -->
+                    <div>
+                        <div class="text-success fs-1 mb-3">✓</div>
+                        <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.wait.answer_submitted')) ?></h4>
+                        <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.wait.wait_for_next')) ?></p>
+                        <a href="" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= $locale === 'en' ? 'Refresh' : 'Sayfayı Yenile' ?></a>
+                    </div>
+                <?php else: ?>
+                    <!-- Question State -->
+                    <div class="text-start">
+                        <div class="mb-4">
+                            <span class="badge bg-primary bg-opacity-10 text-primary py-1.5 px-3 rounded-pill small mb-2"><?= htmlspecialchars(t('student.wait.active_question')) ?></span>
+                            <h4 class="fw-bold lh-base"><?= htmlspecialchars($activeQuestion['question_text']) ?></h4>
+                        </div>
+                        
+                        <form action="<?= eduqr_path('/join/' . $session['short_code'] . '/wait') ?>" method="POST">
+                            <input type="hidden" name="question_id" value="<?= (int)$activeQuestion['id'] ?>">
+                            <?php if ($activeQuestion['type'] === 'open_ended'): ?>
+                                <div class="mb-3">
+                                    <textarea name="answer_value" class="form-control" rows="4" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--card-border); border-radius:12px;" placeholder="<?= $locale === 'en' ? 'Write your response here...' : 'Buraya cevabınızı yazın...' ?>" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= $locale === 'en' ? 'Submit Response' : 'Cevabı Gönder' ?></button>
+                            <?php elseif (!empty($activeQuestion['options']) && is_array($activeQuestion['options'])): ?>
+                                <?php foreach ($activeQuestion['options'] as $idx => $opt): ?>
+                                    <?php $char = chr(65 + $idx); ?>
+                                    <button type="submit" name="answer_value" value="<?= $char ?>" class="option-btn">
+                                        <span class="option-indicator"><?= $char ?></span> <?= htmlspecialchars($opt) ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </form>
+                    </div>
+                <?php endif; ?>
+            <?php endif; ?>
+        </noscript>
 
-        <!-- Question View State (Hidden initially) -->
-        <div id="question-state" class="d-none text-start">
-            <div class="mb-4">
-                <span class="badge bg-primary bg-opacity-10 text-primary py-1.5 px-3 rounded-pill small mb-2"><?= htmlspecialchars(t('student.wait.active_question')) ?></span>
-                <h4 class="fw-bold lh-base" id="q-text"><?= htmlspecialchars(t('student.wait.loading_question')) ?></h4>
+        <div id="js-container">
+            <!-- Default State: Waiting for question -->
+            <div id="wait-state">
+                <div class="glow-spinner"></div>
+                <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.join.waiting')) ?></h4>
+                <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.join.waiting_desc')) ?></p>
             </div>
-            
-            <div id="options-container">
-                <!-- Option buttons injected here dynamically -->
-            </div>
-        </div>
 
-        <!-- Answered / Thank You State (Hidden initially) -->
-        <div id="answered-state" class="d-none">
-            <div class="text-success fs-1 mb-3">✓</div>
-            <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.wait.answer_submitted')) ?></h4>
-            <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.wait.wait_for_next')) ?></p>
+            <!-- Question View State (Hidden initially) -->
+            <div id="question-state" class="d-none text-start">
+                <div class="mb-4">
+                    <span class="badge bg-primary bg-opacity-10 text-primary py-1.5 px-3 rounded-pill small mb-2"><?= htmlspecialchars(t('student.wait.active_question')) ?></span>
+                    <h4 class="fw-bold lh-base" id="q-text"><?= htmlspecialchars(t('student.wait.loading_question')) ?></h4>
+                </div>
+                
+                <div id="options-container">
+                    <!-- Option buttons injected here dynamically -->
+                </div>
+            </div>
+
+            <!-- Answered / Thank You State (Hidden initially) -->
+            <div id="answered-state" class="d-none">
+                <div class="text-success fs-1 mb-3">✓</div>
+                <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.wait.answer_submitted')) ?></h4>
+                <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.wait.wait_for_next')) ?></p>
+            </div>
         </div>
         
         <div class="mt-4 pt-3 border-top border-white border-opacity-10">
@@ -204,6 +259,8 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         // Localized JS variables
         const translationSubmitFailed = <?= json_encode(t('student.wait.submit_failed')) ?>;
         const translationConnectionError = <?= json_encode(t('student.wait.connection_error')) ?>;
+
+        document.getElementById('js-container').style.display = 'block';
 
         const waitState = document.getElementById('wait-state');
         const questionState = document.getElementById('question-state');

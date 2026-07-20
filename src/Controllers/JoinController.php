@@ -6,17 +6,23 @@ namespace EduQR\Controllers;
 
 use EduQR\Repositories\SessionRepository;
 use EduQR\Repositories\ParticipantRepository;
+use EduQR\Repositories\QuestionRepository;
+use EduQR\Repositories\AnswerRepository;
 use EduQR\Services\ProfanityFilter;
 
 final class JoinController
 {
     private SessionRepository $sessionRepo;
     private ParticipantRepository $participantRepo;
+    private QuestionRepository $questionRepo;
+    private AnswerRepository $answerRepo;
 
     public function __construct()
     {
         $this->sessionRepo = new SessionRepository();
         $this->participantRepo = new ParticipantRepository();
+        $this->questionRepo = new QuestionRepository();
+        $this->answerRepo = new AnswerRepository();
     }
 
     public function showHome(): void
@@ -207,6 +213,48 @@ final class JoinController
             exit;
         }
 
+        // JS Devre dışı durumu için aktif soruyu çek
+        $activeQuestion = $this->questionRepo->findActiveBySessionId((int)$session['id']);
+        $hasAnswered = false;
+        if ($activeQuestion !== null) {
+            $hasAnswered = $this->answerRepo->findAnswer((int)$activeQuestion['id'], $participantId) !== null;
+        }
+
         include __DIR__ . '/../../templates/student/wait.php';
+    }
+
+    public function submitWaitAnswer(array $params): void
+    {
+        $shortCode = strtoupper($params['short_code']);
+        $session = $this->sessionRepo->findByShortCode($shortCode);
+
+        if ($session === null || $session['status'] === 'closed') {
+            header('Location: ' . eduqr_path('/join/' . $shortCode));
+            exit;
+        }
+
+        // Katılımcı doğrulaması yap
+        $participantId = (int)($_COOKIE['eduqr_participant'] ?? 0);
+        $participant = $this->participantRepo->findById($participantId);
+
+        if ($participant === null || (int)$participant['session_id'] !== (int)$session['id']) {
+            header('Location: ' . eduqr_path('/join/' . $shortCode));
+            exit;
+        }
+
+        // POST verilerini al
+        $questionId = (int)($_POST['question_id'] ?? 0);
+        $answerValue = trim((string)($_POST['answer_value'] ?? ''));
+
+        $question = $this->questionRepo->findById($questionId);
+        if ($question !== null && $question['status'] === 'active' && (int)$question['session_id'] === (int)$session['id']) {
+            if ($answerValue !== '') {
+                $this->answerRepo->submitAnswer($questionId, $participantId, $answerValue);
+            }
+        }
+
+        // Yönlendir (GET /wait)
+        header('Location: ' . eduqr_path('/join/' . $shortCode . '/wait'));
+        exit;
     }
 }
