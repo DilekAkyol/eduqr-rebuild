@@ -6,6 +6,7 @@ namespace EduQR\Controllers;
 
 use EduQR\Repositories\SessionRepository;
 use EduQR\Repositories\ParticipantRepository;
+use EduQR\Services\ProfanityFilter;
 
 final class JoinController
 {
@@ -139,6 +140,18 @@ final class JoinController
         $locale   = \EduQR\I18n\I18nService::getLocale();
         if ($nickname === '') {
             $nickname = 'anon-' . substr($deviceCookie, 0, 8);
+        }
+
+        // Küfür/argo filtresi (FR-41, FR-43) — anon- prefix'li otomatik isimler muaf
+        if (!str_starts_with($nickname, 'anon-')) {
+            $filter = new ProfanityFilter();
+            if ($filter->contains($nickname)) {
+                $error = $locale === 'en'
+                    ? 'This nickname contains inappropriate language. Please choose a different one.'
+                    : 'Bu rumuz uygunsuz bir ifade içeriyor. Lütfen farklı bir rumuz seçin.';
+                include __DIR__ . '/../../templates/student/join.php';
+                exit;
+            }
         }
 
         // Aynı cihaz daha önce bu oturuma katılmış mı?
