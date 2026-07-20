@@ -170,7 +170,15 @@ $locale = \EduQR\I18n\I18nService::getLocale();
 
     <div class="wait-card text-center" id="card-content">
         <noscript>
-            <?php if ($activeQuestion === null): ?>
+            <?php if ($session['status'] === 'paused'): ?>
+                <!-- Paused State -->
+                <div>
+                    <div class="glow-spinner" style="animation: none; box-shadow: none; border-color: #f59e0b;"></div>
+                    <h4 class="fw-bold mb-3" style="color: #f59e0b;">⏸️ <?= $locale === 'en' ? 'Session Paused' : 'Oturum Duraklatıldı' ?></h4>
+                    <p class="text-muted mb-4 small px-3"><?= $locale === 'en' ? 'The instructor has paused the session. Please wait.' : 'Öğretmen oturumu geçici olarak duraklattı. Lütfen bekleyin.' ?></p>
+                    <a href="" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= $locale === 'en' ? 'Refresh' : 'Sayfayı Yenile' ?></a>
+                </div>
+            <?php elseif ($activeQuestion === null): ?>
                 <!-- Wait State -->
                 <div>
                     <div class="glow-spinner" style="animation: none; box-shadow: none; border-color: #3b82f6;"></div>
@@ -224,6 +232,13 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.join.waiting_desc')) ?></p>
             </div>
 
+            <!-- Paused State -->
+            <div id="paused-state" class="d-none">
+                <div class="glow-spinner" style="animation: none; box-shadow: none; border-color: #f59e0b;"></div>
+                <h4 class="fw-bold mb-3" style="color: #f59e0b;">⏸️ <?= $locale === 'en' ? 'Session Paused' : 'Oturum Duraklatıldı' ?></h4>
+                <p class="text-muted mb-4 small px-3"><?= $locale === 'en' ? 'The instructor has paused the session. Please wait.' : 'Öğretmen oturumu geçici olarak duraklattı. Lütfen bekleyin.' ?></p>
+            </div>
+
             <!-- Question View State (Hidden initially) -->
             <div id="question-state" class="d-none text-start">
                 <div class="mb-4">
@@ -265,6 +280,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         const waitState = document.getElementById('wait-state');
         const questionState = document.getElementById('question-state');
         const answeredState = document.getElementById('answered-state');
+        const pausedState = document.getElementById('paused-state');
         
         const qText = document.getElementById('q-text');
         const optionsContainer = document.getElementById('options-container');
@@ -281,6 +297,11 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 if (data.success === false) {
                     // Redirect to join page if session is invalid or deleted
                     window.location.href = <?= json_encode(eduqr_path('/join/')) ?> + shortCode;
+                    return;
+                }
+
+                if (data.session_status === 'paused') {
+                    showState('paused');
                     return;
                 }
 
@@ -318,6 +339,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             waitState.classList.add('d-none');
             questionState.classList.add('d-none');
             answeredState.classList.add('d-none');
+            pausedState.classList.add('d-none');
 
             if (state === 'wait') {
                 waitState.classList.remove('d-none');
@@ -325,6 +347,8 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 questionState.classList.remove('d-none');
             } else if (state === 'answered') {
                 answeredState.classList.remove('d-none');
+            } else if (state === 'paused') {
+                pausedState.classList.remove('d-none');
             }
         }
 

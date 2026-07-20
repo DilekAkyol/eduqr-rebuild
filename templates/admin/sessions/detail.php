@@ -483,12 +483,20 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                         <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report') ?>" class="btn btn-custom-primary"><?= htmlspecialchars(t('admin.session.view_report_pdf')) ?></a>
                         <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report/csv') ?>" class="btn btn-custom-outline"><?= htmlspecialchars(t('admin.session.download_report_csv')) ?></a>
                         <?php if ($session['status'] !== 'closed'): ?>
-                        <form id="close-session-form"
-                              action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/close') ?>"
-                              method="POST"
-                              style="display:none;">
-                        </form>
-                        <button class="btn btn-logout ms-md-auto" onclick="confirmCloseSession(event)"><?= htmlspecialchars(t('admin.session.close_session')) ?></button>
+                            <?php if ($session['status'] === 'active'): ?>
+                                <form id="pause-session-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/pause') ?>" method="POST" style="display:none;"></form>
+                                <button class="btn btn-custom-outline" onclick="document.getElementById('pause-session-form').submit();">⏸️ <?= $locale === 'en' ? 'Pause' : 'Duraklat' ?></button>
+                            <?php elseif ($session['status'] === 'paused'): ?>
+                                <form id="resume-session-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/resume') ?>" method="POST" style="display:none;"></form>
+                                <button class="btn btn-custom-outline" onclick="document.getElementById('resume-session-form').submit();">▶️ <?= $locale === 'en' ? 'Resume' : 'Devam Ettir' ?></button>
+                            <?php endif; ?>
+
+                            <form id="close-session-form"
+                                  action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/close') ?>"
+                                  method="POST"
+                                  style="display:none;">
+                            </form>
+                            <button class="btn btn-logout ms-md-auto" onclick="confirmCloseSession(event)"><?= htmlspecialchars(t('admin.session.close_session')) ?></button>
                         <?php endif; ?>
                     </div>
                 </div>

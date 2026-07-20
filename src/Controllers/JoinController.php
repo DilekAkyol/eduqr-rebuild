@@ -64,8 +64,18 @@ final class JoinController
             exit;
         }
 
+        $locale = \EduQR\I18n\I18nService::getLocale();
         if ($session['status'] === 'closed') {
-            echo "<h1>Oturum Sonlandırılmış</h1><p>Bu oylama oturumu öğretmen tarafından kapatılmıştır.</p>";
+            $title = $locale === 'en' ? 'Session Closed' : 'Oturum Sonlandırılmış';
+            $desc = $locale === 'en' ? 'This voting session has been closed by the instructor.' : 'Bu oylama oturumu öğretmen tarafından kapatılmıştır.';
+            echo "<h1>" . htmlspecialchars($title) . "</h1><p>" . htmlspecialchars($desc) . "</p>";
+            exit;
+        }
+
+        if ($session['status'] === 'paused') {
+            $title = $locale === 'en' ? 'Session Paused' : 'Oturum Duraklatıldı';
+            $desc = $locale === 'en' ? 'This voting session is currently paused by the instructor. Please try again later.' : 'Bu oylama oturumu öğretmen tarafından geçici olarak duraklatılmıştır. Lütfen daha sonra tekrar deneyin.';
+            echo "<h1>" . htmlspecialchars($title) . "</h1><p>" . htmlspecialchars($desc) . "</p>";
             exit;
         }
 
@@ -120,7 +130,7 @@ final class JoinController
         $shortCode = strtoupper($params['short_code']);
         $session = $this->sessionRepo->findByShortCode($shortCode);
 
-        if ($session === null || $session['status'] === 'closed') {
+        if ($session === null || $session['status'] === 'closed' || $session['status'] === 'paused') {
             header('Location: ' . eduqr_path('/join/' . $shortCode));
             exit;
         }
@@ -248,7 +258,8 @@ final class JoinController
 
         $question = $this->questionRepo->findById($questionId);
         if ($question !== null && $question['status'] === 'active' && (int)$question['session_id'] === (int)$session['id']) {
-            if ($answerValue !== '') {
+            // Sadece oturum aktifken (paused/closed değilken) cevapları kaydet
+            if ($session['status'] === 'active' && $answerValue !== '') {
                 $this->answerRepo->submitAnswer($questionId, $participantId, $answerValue);
             }
         }

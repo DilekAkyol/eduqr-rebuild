@@ -45,7 +45,10 @@ final class PublicQuestionController
         $activeQuestion = $this->questionRepo->findActiveBySessionId((int)$session['id']);
 
         if ($activeQuestion === null) {
-            echo json_encode(['active' => false]);
+            echo json_encode([
+                'active' => false,
+                'session_status' => $session['status']
+            ], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -55,6 +58,7 @@ final class PublicQuestionController
         echo json_encode([
             'active'       => true,
             'has_answered' => $hasAnswered,
+            'session_status' => $session['status'],
             'question'     => [
                 'id'            => $activeQuestion['id'],
                 'question_text' => $activeQuestion['question_text'],
@@ -83,6 +87,17 @@ final class PublicQuestionController
         $question = $this->questionRepo->findById($questionId);
         if ($question === null || $question['status'] !== 'active' || (int)$question['session_id'] !== (int)$participant['session_id']) {
             echo json_encode(['success' => false, 'error' => 'Soru aktif değil veya bulunamadı.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // Oturum durumunu kontrol et (Kapalı veya Duraklatılmış oturumlar cevap kabul etmez)
+        $session = $this->sessionRepo->findById((int)$question['session_id']);
+        if ($session === null || $session['status'] === 'closed') {
+            echo json_encode(['success' => false, 'error' => 'Oturum sonlandırılmış.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        if ($session['status'] === 'paused') {
+            echo json_encode(['success' => false, 'error' => 'Oturum geçici olarak duraklatılmıştır.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
