@@ -58,11 +58,21 @@ final class SessionRepository
 
     public function updateStatus(int $id, string $status): void
     {
-        $stmt = $this->db->prepare("UPDATE sessions SET status = :status WHERE id = :id");
-        $stmt->execute([
-            'status' => $status,
-            'id'     => $id,
-        ]);
+        $now = date('Y-m-d H:i:s');
+        $setClause = "status = :status";
+        if ($status === 'active') {
+            $setClause .= ", started_at = COALESCE(started_at, :now)";
+        } elseif ($status === 'paused') {
+            $setClause .= ", paused_at = :now";
+        } elseif ($status === 'closed') {
+            $setClause .= ", closed_at = :now";
+        }
+        $stmt = $this->db->prepare("UPDATE sessions SET {$setClause} WHERE id = :id");
+        $params = ['status' => $status, 'id' => $id];
+        if ($status === 'active' || $status === 'paused' || $status === 'closed') {
+            $params['now'] = $now;
+        }
+        $stmt->execute($params);
     }
 
     public function setAnonymized(int $id): void

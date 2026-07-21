@@ -16,9 +16,12 @@ final class AuthController
 {
     private AuthService $authService;
 
+    private \EduQR\Repositories\AuditLogRepository $auditRepo;
+
     public function __construct()
     {
         $this->authService = new AuthService();
+        $this->auditRepo = new \EduQR\Repositories\AuditLogRepository();
     }
 
     public function showLogin(): void
@@ -34,6 +37,10 @@ final class AuthController
     {
         $email    = trim($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
+
+        // Rate limiting
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
+        \EduQR\Middleware\RateLimitMiddleware::check($ip, 'login');
 
         // 1. E-posta format kontrolü
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -55,6 +62,8 @@ final class AuthController
 
         try {
             if ($this->authService->login($email, $password)) {
+                \EduQR\Middleware\RateLimitMiddleware::record($ip, 'login', true);
+                $this->auditRepo->log('login', 'instructor', (int)($_SESSION['user_id'] ?? 0), 'user', (int)($_SESSION['user_id'] ?? 0), ['email' => $email]);
                 header('Location: ' . eduqr_path('/admin/dashboard'));
                 exit;
             }
@@ -80,6 +89,7 @@ final class AuthController
             }
         }
 
+        \EduQR\Middleware\RateLimitMiddleware::record($ip, 'login', false);
         $error = t('auth.login.invalid');
         include __DIR__ . '/../../templates/auth/login.php';
     }
@@ -145,7 +155,8 @@ final class AuthController
         $code = str_pad((string)random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
         $expiresAt = date('Y-m-d H:i:s', time() + 900); // 15 dakika geçerli
 
-        $userRepo->create($name, $email, $passwordHash, 'instructor', 0, $code, $expiresAt);
+        $userId = $userRepo->create($name, $email, $passwordHash, 'instructor', 0, $code, $expiresAt);
+        $this->auditRepo->log('user_register', 'instructor', $userId, 'user', $userId, ['email' => $email]);
         $this->sendVerificationEmail($email, $code);
 
         if (session_status() !== PHP_SESSION_ACTIVE) {

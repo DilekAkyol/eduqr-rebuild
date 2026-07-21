@@ -412,6 +412,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             <a href="<?= eduqr_path('/admin/question-bank') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_qbank')) ?></a>
             <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report#participant-list-card') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_participants')) ?></a>
             <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id']) ?>" class="nav-item-custom active"><?= htmlspecialchars(t('admin.report.live_session_nav')) ?></a>
+            <a href="<?= eduqr_path('/admin/audit-logs') ?>" class="nav-item-custom"><?= $locale === 'en' ? 'Audit Logs' : 'Denetim Kayıtları' ?></a>
             <a href="<?= eduqr_path('/admin/archive') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_archive')) ?></a>
             <a href="<?= eduqr_path('/admin/settings') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_settings')) ?></a>
         </div>
@@ -484,14 +485,14 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                         <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report/csv') ?>" class="btn btn-custom-outline"><?= htmlspecialchars(t('admin.session.download_report_csv')) ?></a>
                         <?php if ($session['status'] !== 'closed'): ?>
                             <?php if ($session['status'] === 'active'): ?>
-                                <form id="pause-session-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/pause') ?>" method="POST" style="display:none;"></form>
+                                <form id="pause-session-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/pause') ?>" method="POST" style="display:none;"><?= csrf_field() ?></form>
                                 <button class="btn btn-custom-outline" onclick="document.getElementById('pause-session-form').submit();">⏸️ <?= $locale === 'en' ? 'Pause' : 'Duraklat' ?></button>
                             <?php elseif ($session['status'] === 'paused'): ?>
-                                <form id="resume-session-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/resume') ?>" method="POST" style="display:none;"></form>
+                                <form id="resume-session-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/resume') ?>" method="POST" style="display:none;"><?= csrf_field() ?></form>
                                 <button class="btn btn-custom-outline" onclick="document.getElementById('resume-session-form').submit();">▶️ <?= $locale === 'en' ? 'Resume' : 'Devam Ettir' ?></button>
                             <?php endif; ?>
 
-                            <form id="toggle-results-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/toggle-results') ?>" method="POST" style="display:none;"></form>
+                            <form id="toggle-results-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/toggle-results') ?>" method="POST" style="display:none;"><?= csrf_field() ?></form>
                             <button class="btn <?= (int)($session['show_results_to_students'] ?? 1) === 1 ? 'btn-success bg-success bg-opacity-10 text-success border-success' : 'btn-custom-outline' ?>" onclick="document.getElementById('toggle-results-form').submit();">
                                 <?= (int)($session['show_results_to_students'] ?? 1) === 1
                                     ? '👁️ ' . ($locale === 'en' ? 'Results: Visible' : 'Sonuçlar: Açık')
@@ -502,6 +503,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                                   action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/close') ?>"
                                   method="POST"
                                   style="display:none;">
+                                <?= csrf_field() ?>
                             </form>
                             <button class="btn btn-logout ms-md-auto" onclick="confirmCloseSession(event)"><?= htmlspecialchars(t('admin.session.close_session')) ?></button>
                         <?php endif; ?>
@@ -582,10 +584,12 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                                         <div class="d-flex gap-2">
                                             <?php if ($q['status'] !== 'active'): ?>
                                                 <form action="<?= eduqr_path('/admin/questions/' . (int)$q['id'] . '/activate') ?>" method="POST">
+                                                    <?= csrf_field() ?>
                                                     <button type="submit" class="btn btn-sm btn-success py-2 px-3 rounded-3"><?= htmlspecialchars(t('admin.session.publish')) ?></button>
                                                 </form>
                                             <?php elseif ($q['status'] === 'active'): ?>
                                                 <form action="<?= eduqr_path('/admin/questions/' . (int)$q['id'] . '/close') ?>" method="POST">
+                                                    <?= csrf_field() ?>
                                                     <button type="submit" class="btn btn-sm btn-danger py-2 px-3 rounded-3"><?= htmlspecialchars(t('admin.session.close')) ?></button>
                                                 </form>
                                             <?php endif; ?>
@@ -631,6 +635,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/questions') ?>" method="POST">
+                    <?= csrf_field() ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="question_text" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.session.question_text')) ?></label>

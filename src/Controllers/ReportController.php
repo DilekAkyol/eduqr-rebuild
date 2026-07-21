@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EduQR\Controllers;
 
+use EduQR\Repositories\AuditLogRepository;
 use EduQR\Repositories\CourseRepository;
 use EduQR\Repositories\SessionRepository;
 use EduQR\Repositories\QuestionRepository;
@@ -16,6 +17,7 @@ final class ReportController
     private SessionRepository $sessionRepo;
     private QuestionRepository $questionRepo;
     private AnswerRepository $answerRepo;
+    private AuditLogRepository $auditRepo;
 
     public function __construct()
     {
@@ -23,6 +25,7 @@ final class ReportController
         $this->sessionRepo = new SessionRepository();
         $this->questionRepo = new QuestionRepository();
         $this->answerRepo = new AnswerRepository();
+        $this->auditRepo = new AuditLogRepository();
     }
 
     public function showReport(array $params): void
@@ -202,6 +205,7 @@ final class ReportController
         }
 
         $this->sessionRepo->setAnonymized($sessionId);
+        $this->auditRepo->log('session_anonymize', 'instructor', $user['id'], 'session', $sessionId);
 
         header('Location: ' . eduqr_path('/admin/sessions/' . $sessionId . '/report'));
         exit;
@@ -227,6 +231,7 @@ final class ReportController
         $db = \EduQR\Support\Database::connect();
         $stmt = $db->prepare("DELETE FROM sessions WHERE id = :id");
         $stmt->execute(['id' => $sessionId]);
+        $this->auditRepo->log('session_delete', 'instructor', $user['id'], 'session', $sessionId);
 
         header('Location: ' . eduqr_path('/admin/courses/' . $courseId . '?deleted=1'));
         exit;

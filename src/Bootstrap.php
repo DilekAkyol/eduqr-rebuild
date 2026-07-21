@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace EduQR;
@@ -13,6 +12,16 @@ final class Bootstrap
 
         // 1.5 Dil Altyapısını Başlat
         \EduQR\I18n\I18nService::init();
+
+        // 1.75 CSRF Koruması (sadece normal form POST isteklerinde, API/ngrok isteklerini atla)
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        $isApiOrNgrok = strpos($host, 'ngrok') !== false || strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') === 0;
+        $isJson = ($_SERVER['CONTENT_TYPE'] ?? '') === 'application/json';
+        $isMultipart = str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data');
+        $isAjax = ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiOrNgrok && !$isJson && !$isAjax && !$isMultipart) {
+            \EduQR\Middleware\CsrfMiddleware::validate();
+        }
 
         // 2. Hata Gösterimi Ayarları
         $debug = Config::bool('APP_DEBUG', false);
@@ -284,6 +293,27 @@ final class Bootstrap
 
         $router->post('/eduqr-rebuild/public/join-code', function (): void {
             (new \EduQR\Controllers\JoinController())->joinCode();
+        });
+
+        // Audit Log Sayfası
+        $router->get('/eduqr-rebuild/public/admin/audit-logs', function (): void {
+            \EduQR\Middleware\AuthMiddleware::handle();
+            include __DIR__ . '/../templates/admin/audit-logs.php';
+        });
+
+        // Audit Log JSON API
+        $router->get('/eduqr-rebuild/public/api/v1/audit-logs', function (): void {
+            header('Content-Type: application/json; charset=utf-8');
+            $user = \EduQR\Services\AuthService::user();
+            if ($user === null) {
+                echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+                exit;
+            }
+            $limit = (int)($_GET['limit'] ?? 50);
+            $repo = new \EduQR\Repositories\AuditLogRepository();
+            $logs = $repo->findByUserId((int)$user['id'], $limit);
+            echo json_encode(['success' => true, 'logs' => $logs, 'total' => $repo->count()], JSON_UNESCAPED_UNICODE);
+            exit;
         });
 
         // Test Rotası

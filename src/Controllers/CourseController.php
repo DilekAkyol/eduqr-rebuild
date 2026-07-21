@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EduQR\Controllers;
 
+use EduQR\Repositories\AuditLogRepository;
 use EduQR\Repositories\CourseRepository;
 use EduQR\Repositories\SessionRepository;
 use EduQR\Services\AuthService;
@@ -12,11 +13,13 @@ final class CourseController
 {
     private CourseRepository $courseRepo;
     private SessionRepository $sessionRepo;
+    private AuditLogRepository $auditRepo;
 
     public function __construct()
     {
         $this->courseRepo = new CourseRepository();
         $this->sessionRepo = new SessionRepository();
+        $this->auditRepo = new AuditLogRepository();
     }
 
     public function create(): void
@@ -112,6 +115,7 @@ final class CourseController
         }
 
         $this->courseRepo->updateStatus($courseId, $user['id'], 'archived');
+        $this->auditRepo->log('course_archive', 'instructor', $user['id'], 'course', $courseId);
         
         echo json_encode(['success' => true]);
         exit;
@@ -134,6 +138,7 @@ final class CourseController
         }
 
         $this->courseRepo->updateStatus($courseId, $user['id'], 'active');
+        $this->auditRepo->log('course_restore', 'instructor', $user['id'], 'course', $courseId);
         
         echo json_encode(['success' => true]);
         exit;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EduQR\Controllers;
 
+use EduQR\Repositories\AuditLogRepository;
 use EduQR\Repositories\CourseRepository;
 use EduQR\Repositories\SessionRepository;
 use EduQR\Services\AuthService;
@@ -13,11 +14,13 @@ final class SessionController
 {
     private CourseRepository $courseRepo;
     private SessionRepository $sessionRepo;
+    private AuditLogRepository $auditRepo;
 
     public function __construct()
     {
         $this->courseRepo = new CourseRepository();
         $this->sessionRepo = new SessionRepository();
+        $this->auditRepo = new AuditLogRepository();
     }
 
     public function create(array $params): void
@@ -218,6 +221,7 @@ final class SessionController
         }
 
         $this->sessionRepo->updateStatus($sessionId, 'closed');
+        $this->auditRepo->log('session_close', 'instructor', $user['id'], 'session', $sessionId);
 
         header('Location: ' . eduqr_path('/admin/dashboard'));
         exit;
@@ -251,6 +255,7 @@ final class SessionController
         }
 
         $this->sessionRepo->updateStatus($sessionId, 'paused');
+        $this->auditRepo->log('session_pause', 'instructor', $user['id'], 'session', $sessionId);
 
         header('Location: ' . eduqr_path('/admin/sessions/' . $sessionId));
         exit;
@@ -284,6 +289,7 @@ final class SessionController
         }
 
         $this->sessionRepo->updateStatus($sessionId, 'active');
+        $this->auditRepo->log('session_resume', 'instructor', $user['id'], 'session', $sessionId);
 
         header('Location: ' . eduqr_path('/admin/sessions/' . $sessionId));
         exit;

@@ -50,14 +50,29 @@ final class Router
             if (preg_match($route['pattern'], $uri, $matches)) {
                 // Sadece isimlendirilmiş regex parametrelerini filtrele
                 $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-                call_user_func($route['callback'], $params);
+                try {
+                    call_user_func($route['callback'], $params);
+                } catch (\Throwable $e) {
+                    http_response_code(500);
+                    echo "<h1>500 Internal Server Error</h1>";
+                    echo "<p><strong>Message:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+                    echo "<p><strong>File:</strong> " . htmlspecialchars($e->getFile()) . ":" . $e->getLine() . "</p>";
+                    echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+                    error_log('[eduQR] Unhandled exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+                    exit;
+                }
                 return;
             }
         }
 
         // Bulunamadıysa 404
         http_response_code(404);
-        echo "<h1>404 Not Found</h1><p>The page you requested could not be found.</p>";
+        $errorTemplate = __DIR__ . '/../templates/errors/404.php';
+        if (file_exists($errorTemplate)) {
+            include $errorTemplate;
+        } else {
+            echo "<h1>404 Not Found</h1><p>The page you requested could not be found.</p>";
+        }
         exit;
     }
 }

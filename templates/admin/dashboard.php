@@ -466,6 +466,7 @@ $activeSessionsCount = (int)($activeSessionsStmt->fetch()['cnt'] ?? 0);
             <a href="<?= eduqr_path('/admin/question-bank') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_qbank')) ?></a>
             <a href="<?= $recentSessionId ? eduqr_path('/admin/sessions/' . $recentSessionId . '/report#participant-list-card') : '#' ?>" class="nav-item-custom<?= !$recentSessionId ? ' disabled' : '' ?>"><?= htmlspecialchars(t('admin.report.sidebar_participants')) ?></a>
             <a href="<?= $recentSessionId ? eduqr_path('/admin/sessions/' . $recentSessionId) : '#' ?>" class="nav-item-custom<?= !$recentSessionId ? ' disabled' : '' ?>"><?= htmlspecialchars(t('admin.report.live_session_nav')) ?></a>
+            <a href="<?= eduqr_path('/admin/audit-logs') ?>" class="nav-item-custom"><?= $locale === 'en' ? 'Audit Logs' : 'Denetim Kayıtları' ?></a>
             <a href="<?= eduqr_path('/admin/archive') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_archive')) ?></a>
             <a href="<?= eduqr_path('/admin/settings') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_settings')) ?></a>
         </div>
@@ -582,6 +583,7 @@ $activeSessionsCount = (int)($activeSessionsStmt->fetch()['cnt'] ?? 0);
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="<?= eduqr_path('/admin/courses') ?>" method="POST">
+                    <?= csrf_field() ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="title" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.dashboard.modal_course_name')) ?></label>

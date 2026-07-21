@@ -27,6 +27,14 @@ if (!function_exists('course_title')) {
     }
 }
 
+if (!function_exists('csrf_field')) {
+    function csrf_field(): string
+    {
+        $token = \EduQR\Middleware\CsrfMiddleware::generate();
+        return '<input type="hidden" name="_csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+    }
+}
+
 if (!function_exists('course_desc')) {
     function course_desc(array $course): string {
         $locale = I18nService::getLocale();
