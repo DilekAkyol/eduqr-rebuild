@@ -238,5 +238,6 @@
     "student.wait.live_results": "Canlı Sonuçlar",
     "student.wait.write_response_placeholder": "Buraya cevabınızı yazın...",
     "student.wait.submit_response_btn": "Cevabı Gönder",
-    "student.wait.write_response_alert": "Lütfen önce cevabınızı yazın."
+    "student.wait.write_response_alert": "Lütfen önce cevabınızı yazın.",
+    "auth.register.email_placeholder": "ornek@eduqr.local"
 }

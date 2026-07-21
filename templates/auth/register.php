@@ -1,6 +1,6 @@
 <?php
 $locale = \EduQR\I18n\I18nService::getLocale();
-$placeholder_email = ($locale === 'en') ? 'demo@example.org' : 'örnek@eduqr.local';
+$placeholder_email = t('auth.register.email_placeholder');
 ?>
 <!DOCTYPE html>
 <html lang="<?= $locale ?>">

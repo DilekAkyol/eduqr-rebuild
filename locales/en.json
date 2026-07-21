@@ -238,5 +238,6 @@
     "student.wait.live_results": "Live Results",
     "student.wait.write_response_placeholder": "Write your response here...",
     "student.wait.submit_response_btn": "Submit Response",
-    "student.wait.write_response_alert": "Please write your response first."
+    "student.wait.write_response_alert": "Please write your response first.",
+    "auth.register.email_placeholder": "demo@example.org"
 }
