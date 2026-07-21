@@ -609,7 +609,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
     <div class="sidebar-footer">
         <div class="profile-img">👤</div>
         <div>
-            <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? ($locale === 'en' ? 'Instructor' : 'Öğretmen')) ?></div>
+            <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? t('admin.report.instructor')) ?></div>
             <div class="text-muted small" style="font-size: 0.75rem;"><?= htmlspecialchars(t('admin.report.sidebar_admin')) ?></div>
         </div>
     </div>
@@ -670,7 +670,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                             <div>
                                 <input type="file" id="file-upload" accept=".txt,.pdf" style="display:none;" onchange="handleFileUpload(event)">
                                 <button type="button" class="btn btn-sm btn-outline-primary border-opacity-10 py-1 px-2 rounded-3" style="font-size: 0.75rem;" onclick="document.getElementById('file-upload').click()">
-                                    <?= $locale === 'en' ? '📄 Upload File (.txt, .pdf)' : '📄 Dosyadan Yükle (.txt, .pdf)' ?>
+                                    <?= htmlspecialchars(t('admin.qbank.upload_file'), ENT_QUOTES, 'UTF-8') ?>
                                 </button>
                             </div>
                         </div>
@@ -685,17 +685,17 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                             </div>
                             <div id="file-loading-indicator" style="display:none; font-size:0.75rem; color:var(--accent);">
                                 <span class="spinner" style="width:12px; height:12px; border-width:1.5px; border-top-color:var(--accent); margin-right:4px;"></span>
-                                <?= $locale === 'en' ? 'Reading file...' : 'Dosya okunuyor...' ?>
+                                <?= htmlspecialchars(t('admin.qbank.reading_file'), ENT_QUOTES, 'UTF-8') ?>
                             </div>
                         </div>
                     </div>
 
                     <!-- Soru Tipi Selector -->
                     <div class="mb-4">
-                        <div class="card-label"><?= $locale === 'en' ? 'Question Type' : 'Soru Tipi' ?></div>
+                        <div class="card-label"><?= htmlspecialchars(t('admin.qbank.question_type'), ENT_QUOTES, 'UTF-8') ?></div>
                         <select class="form-select-el" id="question-type" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); border-radius:10px; width:100%; padding:0.6rem 0.8rem; font-size:0.875rem;">
-                            <option value="multiple_choice" selected><?= $locale === 'en' ? 'Multiple Choice' : 'Çoktan Seçmeli' ?></option>
-                            <option value="open_ended"><?= $locale === 'en' ? 'Open-Ended' : 'Açık Uçlu' ?></option>
+                            <option value="multiple_choice" selected><?= htmlspecialchars(t('admin.qbank.type_mc'), ENT_QUOTES, 'UTF-8') ?></option>
+                            <option value="open_ended"><?= htmlspecialchars(t('admin.qbank.type_oe'), ENT_QUOTES, 'UTF-8') ?></option>
                         </select>
                     </div>
 
@@ -727,7 +727,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                         </div>
                         <div class="col-6">
                             <button class="btn-manual w-100 mt-0 py-2 px-1 text-center" style="font-size:0.85rem; background: var(--bg-color); color: var(--text-main); border: 1.5px solid var(--input-border);" onclick="openImportModal()">
-                                📥 <?= $locale === 'en' ? 'Import JSON' : 'JSON İçe Aktar' ?>
+                                📥 <?= htmlspecialchars(t('admin.session.import_json'), ENT_QUOTES, 'UTF-8') ?>
                             </button>
                         </div>
                     </div>
@@ -779,11 +779,11 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                                             <span class="q-tag"><?= count($q['options']) ?> şık</span>
                                         <?php endif; ?>
                                         <?php if (isset($q['type']) && $q['type'] === 'open_ended'): ?>
-                                            <span class="q-tag" style="background:rgba(139, 92, 246, 0.1); color:#8b5cf6; font-weight: 600;"><?= $locale === 'tr' ? 'Açık Uçlu' : 'Open-Ended' ?></span>
+                                            <span class="q-tag" style="background:rgba(139, 92, 246, 0.1); color:#8b5cf6; font-weight: 600;"><?= htmlspecialchars(t('admin.qbank.type_oe'), ENT_QUOTES, 'UTF-8') ?></span>
                                         <?php elseif (isset($q['type']) && $q['type'] === 'yes_no'): ?>
-                                            <span class="q-tag" style="background:rgba(16, 185, 129, 0.1); color:#10b981; font-weight: 600;"><?= $locale === 'tr' ? 'Evet/Hayır' : 'Yes/No' ?></span>
+                                            <span class="q-tag" style="background:rgba(16, 185, 129, 0.1); color:#10b981; font-weight: 600;"><?= htmlspecialchars(t('admin.qbank.type_yn'), ENT_QUOTES, 'UTF-8') ?></span>
                                         <?php elseif (isset($q['type']) && $q['type'] === 'likert'): ?>
-                                            <span class="q-tag" style="background:rgba(59, 130, 246, 0.1); color:#3b82f6; font-weight: 600;"><?= $locale === 'tr' ? 'Likert Ölçeği' : 'Likert Scale' ?></span>
+                                            <span class="q-tag" style="background:rgba(59, 130, 246, 0.1); color:#3b82f6; font-weight: 600;"><?= htmlspecialchars(t('admin.qbank.type_likert'), ENT_QUOTES, 'UTF-8') ?></span>
                                         <?php endif; ?>
                                         <?php if (!empty($q['correct_answer'])): ?>
                                             <span class="q-correct">✓ <?= htmlspecialchars($q['correct_answer']) ?></span>
@@ -816,7 +816,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 <div class="copy-modal-overlay" id="copy-modal-overlay" onclick="closeCopyModal(event)">
     <div class="copy-modal">
         <h4>➕ <?= htmlspecialchars(t('admin.qbank.copy_to_session')) ?></h4>
-        <p><?= $locale === 'tr' ? 'Seçili soruları hangi oturuma kopyalamak istersiniz?' : 'Which session would you like to copy the selected questions to?' ?></p>
+        <p><?= htmlspecialchars(t('admin.qbank.copy_instructions'), ENT_QUOTES, 'UTF-8') ?></p>
 
         <?php if (empty($sessions)): ?>
             <div class="api-key-notice">
@@ -843,7 +843,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             </button>
             <?php if (!empty($sessions)): ?>
             <button class="btn-copy" id="confirm-copy-btn" onclick="confirmCopy()">
-                ➕ <?= $locale === 'tr' ? 'Kopyala' : 'Copy' ?>
+                ➕ <?= htmlspecialchars(t('admin.qbank.copy_btn'), ENT_QUOTES, 'UTF-8') ?>
             </button>
             <?php endif; ?>
         </div>
@@ -854,15 +854,15 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 <div class="manual-modal-overlay" id="manual-modal-overlay" onclick="closeManualModal(event)">
     <div class="manual-modal">
         <h4 class="mb-2" style="font-size:1.1rem; font-weight:700;">+ <?= htmlspecialchars(t('admin.qbank.add_manual')) ?></h4>
-        <p class="mb-4" style="font-size:0.875rem; color:var(--text-muted);"><?= $locale === 'tr' ? 'Soruyu manuel olarak bankaya ekleyin.' : 'Add a question manually to the bank.' ?></p>
+        <p class="mb-4" style="font-size:0.875rem; color:var(--text-muted);"><?= htmlspecialchars(t('admin.qbank.manual_instructions'), ENT_QUOTES, 'UTF-8') ?></p>
 
         <div class="mb-3">
-            <div class="card-label"><?= $locale === 'tr' ? 'Soru Tipi' : 'Question Type' ?></div>
+            <div class="card-label"><?= htmlspecialchars(t('admin.qbank.question_type'), ENT_QUOTES, 'UTF-8') ?></div>
             <select id="manual-q-type" class="form-select-el" onchange="toggleManualQuestionFields()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); border-radius:10px; width:100%; padding:0.6rem 0.8rem; font-size:0.875rem;">
-                <option value="multiple_choice" selected><?= $locale === 'tr' ? 'Çoktan Seçmeli' : 'Multiple Choice' ?></option>
-                <option value="open_ended"><?= $locale === 'tr' ? 'Açık Uçlu' : 'Open-Ended' ?></option>
-                <option value="yes_no"><?= $locale === 'tr' ? 'Evet / Hayır' : 'Yes / No' ?></option>
-                <option value="likert"><?= $locale === 'tr' ? 'Likert Ölçeği (5\'li)' : 'Likert Scale (5-point)' ?></option>
+                <option value="multiple_choice" selected><?= htmlspecialchars(t('admin.qbank.type_mc'), ENT_QUOTES, 'UTF-8') ?></option>
+                <option value="open_ended"><?= htmlspecialchars(t('admin.qbank.type_oe'), ENT_QUOTES, 'UTF-8') ?></option>
+                <option value="yes_no"><?= htmlspecialchars(t('admin.qbank.type_yn'), ENT_QUOTES, 'UTF-8') ?></option>
+                <option value="likert"><?= htmlspecialchars(t('admin.qbank.type_likert'), ENT_QUOTES, 'UTF-8') ?></option>
             </select>
         </div>
         <div class="mb-3">
@@ -874,12 +874,12 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             <div class="mb-3" id="manual-options-container">
                 <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_options')) ?></div>
                 <textarea id="manual-q-options" class="form-textarea" style="min-height:90px;"
-                    placeholder="<?= $locale === 'tr' ? "A) Seçenek 1\nB) Seçenek 2\nC) Seçenek 3\nD) Seçenek 4" : "A) Option 1\nB) Option 2\nC) Option 3\nD) Option 4" ?>"></textarea>
+                    placeholder="<?= htmlspecialchars(t('admin.qbank.options_placeholder'), ENT_QUOTES, 'UTF-8') ?>"></textarea>
             </div>
             <div class="mb-4" id="manual-correct-container">
                 <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_correct')) ?></div>
                 <input type="text" id="manual-q-correct" class="form-input"
-                    placeholder="<?= $locale === 'tr' ? 'Örn: A' : 'e.g., A' ?>">
+                    placeholder="<?= htmlspecialchars(t('admin.qbank.correct_placeholder'), ENT_QUOTES, 'UTF-8') ?>">
             </div>
         </div>
 
@@ -897,18 +897,18 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 <!-- ══ EDIT QUESTION MODAL ══════════════════════════════════════ -->
 <div class="manual-modal-overlay" id="edit-modal-overlay" onclick="closeEditModal(event)">
     <div class="manual-modal">
-        <h4 class="mb-2" style="font-size:1.1rem; font-weight:700;">✏️ <?= $locale === 'tr' ? 'Soruyu Düzenle' : 'Edit Question' ?></h4>
-        <p class="mb-4" style="font-size:0.875rem; color:var(--text-muted);"><?= $locale === 'tr' ? 'Soru bankasındaki soruyu güncelleyin.' : 'Update the question in the question bank.' ?></p>
+        <h4 class="mb-2" style="font-size:1.1rem; font-weight:700;">✏️ <?= htmlspecialchars(t('admin.qbank.edit_title'), ENT_QUOTES, 'UTF-8') ?></h4>
+        <p class="mb-4" style="font-size:0.875rem; color:var(--text-muted);"><?= htmlspecialchars(t('admin.qbank.edit_instructions'), ENT_QUOTES, 'UTF-8') ?></p>
 
         <input type="hidden" id="edit-q-id">
 
         <div class="mb-3">
-            <div class="card-label"><?= $locale === 'tr' ? 'Soru Tipi' : 'Question Type' ?></div>
+            <div class="card-label"><?= htmlspecialchars(t('admin.qbank.question_type'), ENT_QUOTES, 'UTF-8') ?></div>
             <select id="edit-q-type" class="form-select-el" onchange="toggleEditQuestionFields()" style="background:var(--input-bg); color:var(--text-main); border:1px solid var(--input-border); border-radius:10px; width:100%; padding:0.6rem 0.8rem; font-size:0.875rem;">
-                <option value="multiple_choice"><?= $locale === 'tr' ? 'Çoktan Seçmeli' : 'Multiple Choice' ?></option>
-                <option value="open_ended"><?= $locale === 'tr' ? 'Açık Uçlu' : 'Open-Ended' ?></option>
-                <option value="yes_no"><?= $locale === 'tr' ? 'Evet / Hayır' : 'Yes / No' ?></option>
-                <option value="likert"><?= $locale === 'tr' ? 'Likert Ölçeği (5\'li)' : 'Likert Scale (5-point)' ?></option>
+                <option value="multiple_choice"><?= htmlspecialchars(t('admin.qbank.type_mc'), ENT_QUOTES, 'UTF-8') ?></option>
+                <option value="open_ended"><?= htmlspecialchars(t('admin.qbank.type_oe'), ENT_QUOTES, 'UTF-8') ?></option>
+                <option value="yes_no"><?= htmlspecialchars(t('admin.qbank.type_yn'), ENT_QUOTES, 'UTF-8') ?></option>
+                <option value="likert"><?= htmlspecialchars(t('admin.qbank.type_likert'), ENT_QUOTES, 'UTF-8') ?></option>
             </select>
         </div>
         <div class="mb-3">
@@ -919,7 +919,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             <div class="mb-3" id="edit-options-container">
                 <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_options')) ?></div>
                 <textarea id="edit-q-options" class="form-textarea" style="min-height:90px;"
-                    placeholder="<?= $locale === 'tr' ? "Her satıra bir seçenek yazın" : "Write one option per line" ?>"></textarea>
+                    placeholder="<?= htmlspecialchars(t('admin.qbank.options_edit_placeholder'), ENT_QUOTES, 'UTF-8') ?>"></textarea>
             </div>
             <div class="mb-3" id="edit-correct-container">
                 <div class="card-label"><?= htmlspecialchars(t('admin.qbank.manual_correct')) ?></div>
@@ -927,7 +927,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             </div>
         </div>
         <div class="mb-4">
-            <div class="card-label"><?= $locale === 'tr' ? 'Kaynak Etiketi (Opsiyonel)' : 'Source Tag (Optional)' ?></div>
+            <div class="card-label"><?= htmlspecialchars(t('admin.qbank.source_tag'), ENT_QUOTES, 'UTF-8') ?></div>
             <input type="text" id="edit-q-source" class="form-input" placeholder="e.g., Java">
         </div>
 
@@ -936,7 +936,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
                 <?= htmlspecialchars(t('admin.dashboard.cancel')) ?>
             </button>
             <button class="btn-generate" onclick="submitEdit()" style="box-shadow:none; padding:9px 20px;">
-                💾 <?= $locale === 'tr' ? 'Kaydet' : 'Save' ?>
+                💾 <?= htmlspecialchars(t('admin.qbank.save_btn'), ENT_QUOTES, 'UTF-8') ?>
             </button>
         </div>
     </div>
@@ -958,6 +958,12 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
     const t_selectAll       = <?= json_encode(t('admin.qbank.select_all')) ?>;
     const t_deselectAll     = <?= json_encode(t('admin.qbank.deselect_all')) ?>;
     const t_participantPrefix = <?= json_encode(t('admin.report.participant_prefix')) ?>;
+    const t_dragDropHint    = <?= json_encode(t('admin.qbank.modal.drag_drop')) ?>;
+    const t_jsonRequired    = <?= json_encode(t('admin.qbank.modal.json_required')) ?>;
+    const t_importSuccessCount = <?= json_encode(t('admin.qbank.modal.import_success_count')) ?>;
+    const t_importSuccessSuffix = <?= json_encode(t('admin.qbank.modal.import_success_suffix')) ?>;
+    const t_skippedLabel     = <?= json_encode(t('admin.qbank.modal.skipped_label')) ?>;
+    const t_readFileFailed   = <?= json_encode(t('admin.qbank.toast.read_file_failed')) ?>;
     const hasApiKey         = <?= json_encode($hasApiKey) ?>;
 
     const generateUrl       = <?= json_encode(eduqr_path('/admin/question-bank/generate')) ?>;
@@ -1388,7 +1394,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             }
         } catch (err) {
             console.error('File read error:', err);
-            showToast(locale === 'tr' ? 'Dosya okunamadı: ' + err.message : 'Failed to read file: ' + err.message, 'error');
+            showToast(t_readFileFailed + err.message, 'error');
         } finally {
             indicator.style.display = 'none';
             // Reset file input so same file can be re-selected
@@ -1401,7 +1407,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
         document.getElementById('import-modal').classList.add('open');
         document.getElementById('modal-json-file').value = '';
         document.getElementById('import-source-title').value = document.getElementById('source-title').value || '';
-        document.getElementById('modal-file-text').textContent = '<?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?>';
+        document.getElementById('modal-file-text').textContent = t_dragDropHint;
     }
 
     function closeImportModal() {
@@ -1419,7 +1425,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
         if (input.files && input.files[0]) {
             text.innerHTML = '<strong>✅ ' + escapeHtml(input.files[0].name) + '</strong>';
         } else {
-            text.textContent = '<?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?>';
+            text.textContent = t_dragDropHint;
         }
     }
 
@@ -1428,7 +1434,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
         const sourceTitleInput = document.getElementById('import-source-title');
 
         if (!fileInput.files || !fileInput.files[0]) {
-            alert("<?= $locale === 'en' ? 'Please select a .json file.' : 'Lütfen bir .json dosyası seçin.' ?>");
+            alert(t_jsonRequired);
             return;
         }
 
@@ -1443,9 +1449,8 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             });
             const data = await res.json();
             if (data.success) {
-                const msg = "<?= $locale === 'en' ? 'Successfully imported ' : 'Başarıyla ' ?>" + data.count + 
-                            "<?= $locale === 'en' ? ' questions.' : ' soru aktarıldı.' ?>" +
-                            (data.skipped > 0 ? " (<?= $locale === 'en' ? 'Skipped: ' : 'Geçilen: ' ?>" + data.skipped + ")" : "");
+                const msg = t_importSuccessCount + data.count + t_importSuccessSuffix +
+                            (data.skipped > 0 ? t_skippedLabel + data.skipped + ")" : "");
                 alert(msg);
                 location.reload();
             } else {
@@ -1488,29 +1493,29 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 <div id="import-modal" class="manual-modal-overlay" onclick="if(event.target===this) closeImportModal()">
     <div class="manual-modal">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 style="font-weight:700; margin:0;"><?= $locale === 'en' ? 'Import from JSON' : 'JSON Dosyasından Aktar' ?></h4>
+            <h4 style="font-weight:700; margin:0;"><?= htmlspecialchars(t('admin.qbank.modal.import_title'), ENT_QUOTES, 'UTF-8') ?></h4>
             <button class="btn-modal-close" style="font-size:1.5rem; line-height:1; padding:2px 8px; border:none; background:transparent;" onclick="closeImportModal()">×</button>
         </div>
         
         <!-- File Upload Option -->
         <div class="mb-3">
-            <label class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Select JSON File' : 'JSON Dosyası Seçin' ?></label>
+            <label class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.qbank.modal.select_file'), ENT_QUOTES, 'UTF-8') ?></label>
             <div class="file-drop-zone" id="modal-file-drop-zone" style="border: 2px dashed var(--input-border); border-radius:12px; padding:30px; text-align:center; cursor:pointer; background:var(--input-bg);">
                 <input type="file" id="modal-json-file" accept=".json" style="display:none;" onchange="handleModalFileSelect(this)">
                 <div class="file-drop-icon" style="font-size:2.5rem; margin-bottom:6px;">📄</div>
-                <div class="file-drop-text" id="modal-file-text" style="font-size:0.85rem; color:var(--text-muted);"><?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?></div>
+                <div class="file-drop-text" id="modal-file-text" style="font-size:0.85rem; color:var(--text-muted);"><?= htmlspecialchars(t('admin.qbank.modal.drag_drop'), ENT_QUOTES, 'UTF-8') ?></div>
             </div>
         </div>
 
         <!-- Optional Source Tag -->
         <div class="mb-4">
-            <label for="import-source-title" class="card-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Source Tag (Optional)' : 'Kaynak Etiketi (Opsiyonel)' ?></label>
+            <label for="import-source-title" class="card-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.qbank.source_tag'), ENT_QUOTES, 'UTF-8') ?></label>
             <input type="text" id="import-source-title" class="form-input w-100" style="width:100%; border: 1.5px solid var(--input-border); border-radius:10px; padding:10px 14px; background:var(--input-bg); color:var(--text-main);" placeholder="e.g. Java, Python">
         </div>
 
         <div class="d-flex gap-2 justify-content-end">
-            <button type="button" class="btn-modal-close" style="padding: 8px 18px;" onclick="closeImportModal()"><?= $locale === 'en' ? 'Cancel' : 'İptal' ?></button>
-            <button type="button" onclick="importBankQuestions()" class="btn-generate" style="width:auto; padding:8px 24px; font-size:0.875rem; border-radius:10px; background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer;"><?= $locale === 'en' ? 'Import' : 'İçe Aktar' ?></button>
+            <button type="button" class="btn-modal-close" style="padding: 8px 18px;" onclick="closeImportModal()"><?= htmlspecialchars(t('admin.dashboard.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
+            <button type="button" onclick="importBankQuestions()" class="btn-generate" style="width:auto; padding:8px 24px; font-size:0.875rem; border-radius:10px; background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer;"><?= htmlspecialchars(t('admin.session.import'), ENT_QUOTES, 'UTF-8') ?></button>
         </div>
     </div>
 </div>

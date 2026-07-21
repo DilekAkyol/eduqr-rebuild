@@ -446,7 +446,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
     <div class="sidebar-footer">
         <div class="profile-img">👤</div>
         <div>
-            <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? ($locale === 'en' ? 'Instructor' : 'Öğretmen')) ?></div>
+            <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? t('admin.report.instructor')) ?></div>
             <div class="text-muted small" style="font-size: 0.75rem;"><?= htmlspecialchars(t('admin.report.sidebar_admin')) ?></div>
         </div>
     </div>
@@ -470,64 +470,61 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 
     <div class="page-content">
         <h1 class="page-title"><?= htmlspecialchars($settings) ?></h1>
-        <p class="page-desc"><?= $locale === 'en' ? 'Manage your account settings and profile.' : 'Hesap ayarlarınızı ve profilinizi yönetin.' ?></p>
+        <p class="page-desc"><?= htmlspecialchars(t('admin.settings.desc'), ENT_QUOTES, 'UTF-8') ?></p>
 
         <div class="settings-grid">
             <!-- Profile Info Card -->
             <div class="settings-card">
-                <h3 class="card-title"><?= $locale === 'en' ? 'Profile Details' : 'Profil Bilgileri' ?></h3>
+                <h3 class="card-title"><?= htmlspecialchars(t('admin.settings.profile_details'), ENT_QUOTES, 'UTF-8') ?></h3>
                 
                 <form id="update-profile-form" onsubmit="handleUpdateProfile(event)">
                     <div class="mb-3">
-                        <label for="profile_name" class="form-label-custom"><?= $locale === 'en' ? 'Full Name' : 'Ad Soyad' ?></label>
+                        <label for="profile_name" class="form-label-custom"><?= htmlspecialchars(t('admin.settings.full_name'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="text" class="form-input-custom" id="profile_name" required value="<?= htmlspecialchars($user['name'] ?? '') ?>">
                     </div>
                     <div class="mb-3">
-                        <label for="profile_email" class="form-label-custom"><?= $locale === 'en' ? 'Email Address' : 'E-posta Adresi' ?></label>
+                        <label for="profile_email" class="form-label-custom"><?= htmlspecialchars(t('admin.settings.email_address'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="email" class="form-input-custom" id="profile_email" required value="<?= htmlspecialchars($user['email'] ?? '') ?>">
                     </div>
                     <div class="mb-4">
-                        <label class="form-label-custom"><?= $locale === 'en' ? 'Role' : 'Rol' ?></label>
+                        <label class="form-label-custom"><?= htmlspecialchars(t('admin.settings.role'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="text" class="form-input-custom" value="<?= htmlspecialchars($user['role'] ?? '') ?>" style="text-transform: capitalize;" disabled>
                     </div>
                     
-                    <button type="submit" id="update-profile-btn" class="btn-save"><?= $locale === 'en' ? 'Update Profile' : 'Profili Güncelle' ?></button>
+                    <button type="submit" id="update-profile-btn" class="btn-save"><?= htmlspecialchars(t('admin.settings.update_profile'), ENT_QUOTES, 'UTF-8') ?></button>
                 </form>
             </div>
 
             <!-- Password Change Card -->
             <div class="settings-card">
-                <h3 class="card-title"><?= $locale === 'en' ? 'Change Password' : 'Şifre Değiştir' ?></h3>
+                <h3 class="card-title"><?= htmlspecialchars(t('admin.settings.change_password'), ENT_QUOTES, 'UTF-8') ?></h3>
                 
                 <form id="change-password-form" onsubmit="handleChangePassword(event)">
                     <div class="mb-3">
-                        <label for="old_password" class="form-label-custom"><?= $locale === 'en' ? 'Current Password' : 'Mevcut Şifre' ?></label>
+                        <label for="old_password" class="form-label-custom"><?= htmlspecialchars(t('admin.settings.current_password'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="password" class="form-input-custom" id="old_password" required>
                     </div>
                     <div class="mb-3">
-                        <label for="new_password" class="form-label-custom"><?= $locale === 'en' ? 'New Password' : 'Yeni Şifre' ?></label>
+                        <label for="new_password" class="form-label-custom"><?= htmlspecialchars(t('admin.settings.new_password'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="password" class="form-input-custom" id="new_password" required>
                     </div>
                     <div class="mb-4">
-                        <label for="confirm_password" class="form-label-custom"><?= $locale === 'en' ? 'Confirm New Password' : 'Yeni Şifre (Tekrar)' ?></label>
+                        <label for="confirm_password" class="form-label-custom"><?= htmlspecialchars(t('admin.settings.confirm_new_password'), ENT_QUOTES, 'UTF-8') ?></label>
                         <input type="password" class="form-input-custom" id="confirm_password" required>
                     </div>
                     
-                    <button type="submit" id="save-btn" class="btn-save"><?= $locale === 'en' ? 'Update Password' : 'Şifreyi Güncelle' ?></button>
+                    <button type="submit" id="save-btn" class="btn-save"><?= htmlspecialchars(t('admin.settings.update_password'), ENT_QUOTES, 'UTF-8') ?></button>
                 </form>
             </div>
 
             <!-- Danger Zone: Delete Account -->
             <div class="settings-card danger-card">
-                <h3 class="card-title" style="color:#ef4444;">⚠️ <?= $locale === 'en' ? 'Danger Zone' : 'Tehlikeli Bölge' ?></h3>
+                <h3 class="card-title" style="color:#ef4444;">⚠️ <?= htmlspecialchars(t('admin.settings.danger_zone'), ENT_QUOTES, 'UTF-8') ?></h3>
                 <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:20px; line-height:1.6;">
-                    <?= $locale === 'en'
-                        ? 'Permanently delete your account. This will remove <strong>all your courses, sessions, participants, question banks</strong> and account data. This cannot be undone.'
-                        : 'Hesabınızı kalıcı olarak silin. <strong>Tüm dersleriniz, oturumlarınız, katılımcılar ve soru bankası</strong> silinir. Bu işlem geri alınamaz.'
-                    ?>
+                    <?= t('admin.settings.danger_desc') ?>
                 </p>
                 <button type="button" id="open-delete-modal-btn" class="btn-danger-custom" onclick="openDeleteModal()">
-                    🗑️ <?= $locale === 'en' ? 'Delete My Account' : 'Hesabımı Sil' ?>
+                    🗑️ <?= htmlspecialchars(t('admin.settings.delete_account_btn'), ENT_QUOTES, 'UTF-8') ?>
                 </button>
             </div>
         </div>
@@ -585,7 +582,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             const data = await res.json();
             
             if (data.success) {
-                showToast('<?= $locale === 'en' ? "Profile updated successfully!" : "Profil başarıyla güncellendi!" ?>', 'success');
+                showToast('<?= htmlspecialchars(t('admin.settings.toast.profile_success')) ?>', 'success');
                 // Reload to update sidebar name and other possible places
                 setTimeout(() => location.reload(), 1000);
             } else {
@@ -621,7 +618,7 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             const data = await res.json();
             
             if (data.success) {
-                showToast('<?= $locale === 'en' ? "Password updated successfully!" : "Şifreniz başarıyla güncellendi!" ?>', 'success');
+                showToast('<?= htmlspecialchars(t('admin.settings.toast.password_success')) ?>', 'success');
                 document.getElementById('change-password-form').reset();
             } else {
                 showToast(data.error || 'Şifre güncellenemedi.', 'error');
@@ -648,12 +645,12 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
         const btn = document.getElementById('confirm-delete-btn');
 
         if (!password) {
-            showToast('<?= $locale === "en" ? "Please enter your password." : "Lütfen şifrenizi girin." ?>', 'error');
+            showToast('<?= htmlspecialchars(t('admin.settings.toast.password_required')) ?>', 'error');
             return;
         }
 
         btn.disabled = true;
-        btn.textContent = '<?= $locale === "en" ? "Deleting..." : "Siliniyor..." ?>';
+        btn.textContent = '<?= htmlspecialchars(t('admin.settings.deleting')) ?>';
 
         try {
             const res = await fetch(deleteAccountUrl, {
@@ -663,17 +660,17 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
             });
             const data = await res.json();
             if (data.success) {
-                showToast('<?= $locale === "en" ? "Account deleted. Redirecting..." : "Hesap silindi. Yönlendiriliyor..." ?>', 'success');
+                showToast('<?= htmlspecialchars(t('admin.settings.toast.account_deleted')) ?>', 'success');
                 setTimeout(() => { window.location.href = data.redirect || '<?= eduqr_path("/login") ?>'; }, 1500);
             } else {
-                showToast(data.error || '<?= $locale === "en" ? "Could not delete account." : "Hesap silinemedi." ?>', 'error');
+                showToast(data.error || '<?= htmlspecialchars(t('admin.settings.toast.delete_failed')) ?>', 'error');
                 btn.disabled = false;
-                btn.textContent = '<?= $locale === "en" ? "Yes, Delete My Account" : "Evet, Hesabımı Sil" ?>';
+                btn.textContent = '<?= htmlspecialchars(t('admin.settings.btn_delete_confirm')) ?>';
             }
         } catch (err) {
-            showToast('<?= $locale === "en" ? "Connection error: " : "Bağlantı hatası: " ?>' + err.message, 'error');
+            showToast('<?= htmlspecialchars(t('admin.settings.toast.connection_error')) ?>' + err.message, 'error');
             btn.disabled = false;
-            btn.textContent = '<?= $locale === "en" ? "Yes, Delete My Account" : "Evet, Hesabımı Sil" ?>';
+            btn.textContent = '<?= htmlspecialchars(t('admin.settings.btn_delete_confirm')) ?>';
         }
     }
 </script>
@@ -681,23 +678,20 @@ $recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 <!-- Delete Account Confirmation Modal -->
 <div class="modal-overlay" id="delete-modal" onclick="if(event.target===this) closeDeleteModal()">
     <div class="modal-box">
-        <div class="modal-title">⚠️ <?= $locale === 'en' ? 'Confirm Account Deletion' : 'Hesap Silmeyi Onayla' ?></div>
+        <div class="modal-title">⚠️ <?= htmlspecialchars(t('admin.settings.modal.delete_title'), ENT_QUOTES, 'UTF-8') ?></div>
         <p class="modal-desc">
-            <?= $locale === 'en'
-                ? 'This will permanently delete your account and all associated data. Enter your current password to confirm.'
-                : 'Bu işlem hesabınızı ve tüm ilgili verilerinizi kalıcı olarak silecektir. Onaylamak için mevcut şifrenizi girin.'
-            ?>
+            <?= htmlspecialchars(t('admin.settings.modal.delete_desc'), ENT_QUOTES, 'UTF-8') ?>
         </p>
         <div class="mb-3">
-            <label class="form-label-custom"><?= $locale === 'en' ? 'Your Password' : 'Şifreniz' ?></label>
+            <label class="form-label-custom"><?= htmlspecialchars(t('admin.settings.modal.password_label'), ENT_QUOTES, 'UTF-8') ?></label>
             <input type="password" class="form-input-custom" id="delete-password-input"
-                   placeholder="<?= $locale === 'en' ? 'Enter your password' : 'Şifrenizi girin' ?>"
+                   placeholder="<?= htmlspecialchars(t('admin.settings.modal.password_placeholder'), ENT_QUOTES, 'UTF-8') ?>"
                    onkeydown="if(event.key==='Enter') handleDeleteAccount()">
         </div>
         <div class="modal-actions">
-            <button class="btn-cancel" onclick="closeDeleteModal()"><?= $locale === 'en' ? 'Cancel' : 'İptal' ?></button>
+            <button class="btn-cancel" onclick="closeDeleteModal()"><?= htmlspecialchars(t('admin.dashboard.cancel'), ENT_QUOTES, 'UTF-8') ?></button>
             <button class="btn-danger-custom" id="confirm-delete-btn" onclick="handleDeleteAccount()">
-                <?= $locale === 'en' ? 'Yes, Delete My Account' : 'Evet, Hesabımı Sil' ?>
+                <?= htmlspecialchars(t('admin.settings.btn_delete_confirm'), ENT_QUOTES, 'UTF-8') ?>
             </button>
         </div>
     </div>
