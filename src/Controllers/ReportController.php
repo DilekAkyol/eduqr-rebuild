@@ -18,6 +18,7 @@ final class ReportController
     private QuestionRepository $questionRepo;
     private AnswerRepository $answerRepo;
     private AuditLogRepository $auditRepo;
+    private \EduQR\Repositories\ParticipantRepository $participantRepo;
 
     public function __construct()
     {
@@ -26,6 +27,7 @@ final class ReportController
         $this->questionRepo = new QuestionRepository();
         $this->answerRepo = new AnswerRepository();
         $this->auditRepo = new AuditLogRepository();
+        $this->participantRepo = new \EduQR\Repositories\ParticipantRepository();
     }
 
     public function showReport(array $params): void
@@ -38,14 +40,7 @@ final class ReportController
 
         $sessionId = (int) $params['id'];
 
-        $db = \EduQR\Support\Database::connect();
-        // Runtime schema check for ai_analysis column
-        try {
-            $db->query("SELECT ai_analysis FROM sessions LIMIT 1");
-        } catch (\PDOException $e) {
-            // Column does not exist, add it
-            $db->exec("ALTER TABLE sessions ADD COLUMN ai_analysis TEXT NULL");
-        }
+
 
         $session = $this->sessionRepo->findById($sessionId);
         if ($session === null) {
@@ -66,10 +61,7 @@ final class ReportController
         $anonymize = ((int)($session['is_anonymized'] ?? 0) === 1) || (($_GET['anonymize'] ?? '') === 'true');
         
         // Katılımcıları listele
-        $db = \EduQR\Support\Database::connect();
-        $stmt = $db->prepare("SELECT * FROM participants WHERE session_id = :session_id ORDER BY created_at ASC");
-        $stmt->execute(['session_id' => $sessionId]);
-        $participants = $stmt->fetchAll() ?: [];
+        $participants = $this->participantRepo->getAllBySessionId($sessionId);
 
         // Dinamik anonimleştirme haritası
         $participantMapping = [];
@@ -107,6 +99,8 @@ final class ReportController
             }
         }
 
+        $recentSessionId = $this->sessionRepo->findRecentActiveSessionIdByUserId((int)$user['id']);
+
         include __DIR__ . '/../../templates/admin/sessions/report.php';
     }
 
@@ -125,17 +119,7 @@ final class ReportController
             exit;
         }
 
-        $db = \EduQR\Support\Database::connect();
-        $stmt = $db->prepare(
-            "SELECT p.nickname, q.question_text, a.answer_value, a.created_at
-             FROM answers a
-             JOIN participants p ON a.participant_id = p.id
-             JOIN questions q ON a.question_id = q.id
-             WHERE q.session_id = :session_id
-             ORDER BY q.id ASC, a.created_at ASC"
-        );
-        $stmt->execute(['session_id' => $sessionId]);
-        $rows = $stmt->fetchAll() ?: [];
+        $rows = $this->answerRepo->getAnswersReportForSession($sessionId);
 
         // HTTP Headers for CSV download
         header('Content-Type: text/csv; charset=utf-8');
@@ -193,16 +177,7 @@ final class ReportController
             exit;
         }
 
-        $db = \EduQR\Support\Database::connect();
-        // Fetch all participants for this session
-        $stmt = $db->prepare("SELECT id FROM participants WHERE session_id = :session_id ORDER BY id ASC");
-        $stmt->execute(['session_id' => $sessionId]);
-        $participants = $stmt->fetchAll() ?: [];
-
-        foreach ($participants as $idx => $p) {
-            $update = $db->prepare("UPDATE participants SET nickname = :nickname WHERE id = :id");
-            $update->execute(['nickname' => 'Katılımcı ' . ($idx + 1), 'id' => $p['id']]);
-        }
+        $this->participantRepo->anonymizeAllInSession($sessionId);
 
         $this->sessionRepo->setAnonymized($sessionId);
         $this->auditRepo->log('session_anonymize', 'instructor', $user['id'], 'session', $sessionId);
@@ -228,9 +203,7 @@ final class ReportController
 
         $courseId = (int)$session['course_id'];
 
-        $db = \EduQR\Support\Database::connect();
-        $stmt = $db->prepare("DELETE FROM sessions WHERE id = :id");
-        $stmt->execute(['id' => $sessionId]);
+        $this->sessionRepo->delete($sessionId);
         $this->auditRepo->log('session_delete', 'instructor', $user['id'], 'session', $sessionId);
 
         header('Location: ' . eduqr_path('/admin/courses/' . $courseId . '?deleted=1'));
@@ -252,14 +225,7 @@ final class ReportController
 
         $sessionId = (int)$params['id'];
 
-        $db = \EduQR\Support\Database::connect();
-        // Runtime schema check for ai_analysis column
-        try {
-            $db->query("SELECT ai_analysis FROM sessions LIMIT 1");
-        } catch (\PDOException $e) {
-            // Column does not exist, add it
-            $db->exec("ALTER TABLE sessions ADD COLUMN ai_analysis TEXT NULL");
-        }
+
 
         $session = $this->sessionRepo->findById($sessionId);
         if ($session === null) {
@@ -358,8 +324,7 @@ final class ReportController
         }
 
         // Save to database
-        $stmt = $db->prepare("UPDATE sessions SET ai_analysis = :ai_analysis WHERE id = :id");
-        $stmt->execute(['ai_analysis' => $rawText, 'id' => $sessionId]);
+        $this->sessionRepo->saveAiAnalysis($sessionId, $rawText);
 
         echo json_encode(['success' => true, 'analysis' => $rawText], JSON_UNESCAPED_UNICODE);
         exit;

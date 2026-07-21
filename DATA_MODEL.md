@@ -236,6 +236,7 @@ CREATE TABLE sessions (
     closed_at                 DATETIME     NULL,
     delete_requested_at       DATETIME     NULL,
     anonymized                TINYINT(1)   NOT NULL DEFAULT 0,
+    ai_analysis               TEXT         NULL,
     created_at                DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at                DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
                                                     ON UPDATE CURRENT_TIMESTAMP,

@@ -32,18 +32,8 @@ final class QuestionBankController
         }
 
         $bankQuestions = $this->bankRepo->findByUserId((int)$user['id']);
-
-        // Kullanıcının tüm aktif oturumlarını getir (oturum seçimi için)
-        $db = \EduQR\Support\Database::connect();
-        $stmt = $db->prepare(
-            "SELECT s.id, s.title, s.short_code, s.status, c.title AS course_name, c.title_en AS course_name_en
-             FROM sessions s
-             JOIN courses c ON s.course_id = c.id
-             WHERE c.user_id = :user_id AND s.status != 'closed'
-             ORDER BY s.created_at DESC"
-        );
-        $stmt->execute(['user_id' => $user['id']]);
-        $sessions = $stmt->fetchAll() ?: [];
+        $sessions = $this->sessionRepo->getActiveAndDraftSessionsByUserId((int)$user['id']);
+        $recentSessionId = $this->sessionRepo->findRecentActiveSessionIdByUserId((int)$user['id']);
 
         $hasApiKey = Config::get('GEMINI_API_KEY', '') !== '';
 

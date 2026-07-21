@@ -174,8 +174,7 @@ final class JoinController
         $existing = $this->participantRepo->findByDeviceCookieAndSessionId($deviceCookie, (int)$session['id']);
         if ($existing !== null) {
             $participantId = (int)$existing['id'];
-            $updateStmt = \EduQR\Support\Database::connect()->prepare("UPDATE participants SET nickname = :nickname WHERE id = :id");
-            $updateStmt->execute(['nickname' => $nickname, 'id' => $participantId]);
+            $this->participantRepo->updateNickname($participantId, $nickname);
         } else {
             // Başka bir cihaz bu rumuzu daha önce aldı mı? (case-insensitive, FR-42)
             $takenBy = $this->participantRepo->findBySessionIdAndNickname((int)$session['id'], $nickname);

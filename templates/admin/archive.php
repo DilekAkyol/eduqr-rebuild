@@ -2,25 +2,7 @@
 use EduQR\Services\AuthService;
 use EduQR\Repositories\CourseRepository;
 
-$user = AuthService::user();
-$db = \EduQR\Support\Database::connect();
-$stmt = $db->prepare("SELECT * FROM courses WHERE user_id = :user_id AND status = 'archived' ORDER BY created_at DESC");
-$stmt->execute(['user_id' => $user['id']]);
-$archivedCourses = $stmt->fetchAll() ?: [];
 $locale = \EduQR\I18n\I18nService::getLocale();
-
-// Fetch the user's most recent session ID across all their courses
-$recentSessionStmt = $db->prepare("
-    SELECT s.id 
-    FROM sessions s
-    JOIN courses c ON s.course_id = c.id
-    WHERE c.user_id = :user_id AND c.status = 'active'
-    ORDER BY s.created_at DESC
-    LIMIT 1
-");
-$recentSessionStmt->execute(['user_id' => (int)$user['id']]);
-$recentSession = $recentSessionStmt->fetch();
-$recentSessionId = $recentSession ? (int)$recentSession['id'] : null;
 ?>
 <!DOCTYPE html>
 <html lang="<?= $locale ?>">

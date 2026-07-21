@@ -74,4 +74,34 @@ final class ParticipantRepository
         $stmt = $this->db->prepare("DELETE FROM participants WHERE id = :id");
         $stmt->execute(['id' => $id]);
     }
+
+    public function countBySessionId(int $sessionId): int
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) as cnt FROM participants WHERE session_id = :session_id");
+        $stmt->execute(['session_id' => $sessionId]);
+        $row = $stmt->fetch();
+        return $row ? (int)($row['cnt'] ?? 0) : 0;
+    }
+
+    public function updateNickname(int $id, string $nickname): void
+    {
+        $stmt = $this->db->prepare("UPDATE participants SET nickname = :nickname WHERE id = :id");
+        $stmt->execute(['nickname' => $nickname, 'id' => $id]);
+    }
+
+    public function getAllBySessionId(int $sessionId): array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM participants WHERE session_id = :session_id ORDER BY created_at ASC");
+        $stmt->execute(['session_id' => $sessionId]);
+        return $stmt->fetchAll() ?: [];
+    }
+
+    public function anonymizeAllInSession(int $sessionId): void
+    {
+        $participants = $this->getAllBySessionId($sessionId);
+        foreach ($participants as $idx => $p) {
+            $stmt = $this->db->prepare("UPDATE participants SET nickname = :nickname WHERE id = :id");
+            $stmt->execute(['nickname' => 'Katılımcı ' . ($idx + 1), 'id' => (int)$p['id']]);
+        }
+    }
 }

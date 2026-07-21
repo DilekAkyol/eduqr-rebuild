@@ -141,13 +141,11 @@ final class SessionController
         header('Content-Type: application/json; charset=utf-8');
         $sessionId = (int) $params['id'];
 
-        $db = \EduQR\Support\Database::connect();
-        $stmt = $db->prepare("SELECT COUNT(*) as cnt FROM participants WHERE session_id = :session_id");
-        $stmt->execute(['session_id' => $sessionId]);
-        $row = $stmt->fetch();
+        $participantRepo = new \EduQR\Repositories\ParticipantRepository();
+        $count = $participantRepo->countBySessionId($sessionId);
 
         echo json_encode([
-            'count' => (int)($row['cnt'] ?? 0),
+            'count' => $count,
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -168,16 +166,7 @@ final class SessionController
         $answerRepo = new \EduQR\Repositories\AnswerRepository();
 
         if ($activeQuestion['type'] === 'open_ended') {
-            $db = \EduQR\Support\Database::connect();
-            $stmt = $db->prepare(
-                "SELECT a.answer_value, p.nickname, a.created_at 
-                 FROM answers a
-                 JOIN participants p ON a.participant_id = p.id
-                 WHERE a.question_id = :question_id
-                 ORDER BY a.created_at ASC"
-            );
-            $stmt->execute(['question_id' => (int)$activeQuestion['id']]);
-            $answers = $stmt->fetchAll() ?: [];
+            $answers = $answerRepo->getAnswersForQuestion((int)$activeQuestion['id']);
             
             echo json_encode([
                 'active' => true,

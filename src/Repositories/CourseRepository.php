@@ -77,4 +77,12 @@ final class CourseRepository
 
         return $course ?: null;
     }
+
+    public function findArchivedByUserId(int $userId): array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM courses WHERE user_id = :user_id AND status = 'archived' ORDER BY created_at DESC");
+        $stmt->execute(['user_id' => $userId]);
+
+        return $stmt->fetchAll() ?: [];
+    }
 }

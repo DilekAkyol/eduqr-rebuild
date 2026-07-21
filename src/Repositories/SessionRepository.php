@@ -89,4 +89,57 @@ final class SessionRepository
             'id'  => $id,
         ]);
     }
+
+    public function findRecentActiveSessionIdByUserId(int $userId): ?int
+    {
+        $stmt = $this->db->prepare("
+            SELECT s.id 
+            FROM sessions s
+            JOIN courses c ON s.course_id = c.id
+            WHERE c.user_id = :user_id AND c.status = 'active'
+            ORDER BY s.created_at DESC
+            LIMIT 1
+        ");
+        $stmt->execute(['user_id' => $userId]);
+        $row = $stmt->fetch();
+        return $row ? (int)$row['id'] : null;
+    }
+
+    public function getActiveAndDraftSessionsByUserId(int $userId): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT s.id, s.title, s.short_code, s.status, c.title AS course_name, c.title_en AS course_name_en
+            FROM sessions s
+            JOIN courses c ON s.course_id = c.id
+            WHERE c.user_id = :user_id AND s.status != 'closed'
+            ORDER BY s.created_at DESC
+        ");
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetchAll() ?: [];
+    }
+
+    public function delete(int $id): void
+    {
+        $stmt = $this->db->prepare("DELETE FROM sessions WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+    }
+
+    public function saveAiAnalysis(int $id, string $analysis): void
+    {
+        $stmt = $this->db->prepare("UPDATE sessions SET ai_analysis = :ai_analysis WHERE id = :id");
+        $stmt->execute(['ai_analysis' => $analysis, 'id' => $id]);
+    }
+
+    public function countActiveSessionsByUserId(int $userId): int
+    {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(s.id) as cnt 
+            FROM sessions s
+            JOIN courses c ON s.course_id = c.id
+            WHERE c.user_id = :user_id AND s.status = 'active'
+        ");
+        $stmt->execute(['user_id' => $userId]);
+        $row = $stmt->fetch();
+        return $row ? (int)($row['cnt'] ?? 0) : 0;
+    }
 }

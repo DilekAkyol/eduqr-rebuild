@@ -71,4 +71,19 @@ final class AnswerRepository
 
         return $stmt->fetchAll() ?: [];
     }
+
+    public function getAnswersReportForSession(int $sessionId): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT p.nickname, q.question_text, a.answer_value, a.created_at
+             FROM answers a
+             JOIN participants p ON a.participant_id = p.id
+             JOIN questions q ON a.question_id = q.id
+             WHERE q.session_id = :session_id
+             ORDER BY q.id ASC, a.created_at ASC"
+        );
+        $stmt->execute(['session_id' => $sessionId]);
+
+        return $stmt->fetchAll() ?: [];
+    }
 }

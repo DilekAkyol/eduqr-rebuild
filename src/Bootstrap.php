@@ -78,16 +78,25 @@ final class Bootstrap
         // ── Korumalı Admin Dashboard ───────────────────────────────────────
         $router->get('/eduqr-rebuild/public/admin/dashboard', function (): void {
             \EduQR\Middleware\AuthMiddleware::handle();
+            $user = \EduQR\Services\AuthService::user();
+            $sessionRepo = new \EduQR\Repositories\SessionRepository();
+            $recentSessionId = $sessionRepo->findRecentActiveSessionIdByUserId((int)$user['id']);
+            $activeSessionsCount = $sessionRepo->countActiveSessionsByUserId((int)$user['id']);
             include __DIR__ . '/../templates/admin/dashboard.php';
         });
 
         $router->get('/eduqr-rebuild/public/admin/archive', function (): void {
             \EduQR\Middleware\AuthMiddleware::handle();
+            $user = \EduQR\Services\AuthService::user();
+            $recentSessionId = (new \EduQR\Repositories\SessionRepository())->findRecentActiveSessionIdByUserId((int)$user['id']);
+            $archivedCourses = (new \EduQR\Repositories\CourseRepository())->findArchivedByUserId((int)$user['id']);
             include __DIR__ . '/../templates/admin/archive.php';
         });
 
         $router->get('/eduqr-rebuild/public/admin/settings', function (): void {
             \EduQR\Middleware\AuthMiddleware::handle();
+            $user = \EduQR\Services\AuthService::user();
+            $recentSessionId = (new \EduQR\Repositories\SessionRepository())->findRecentActiveSessionIdByUserId((int)$user['id']);
             include __DIR__ . '/../templates/admin/settings.php';
         });
 

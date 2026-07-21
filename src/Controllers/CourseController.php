@@ -94,6 +94,7 @@ final class CourseController
         }
 
         $sessions = $this->sessionRepo->findByCourseId($courseId);
+        $recentSessionId = $this->sessionRepo->findRecentActiveSessionIdByUserId((int)$user['id']);
 
         include __DIR__ . '/../../templates/admin/courses/detail.php';
     }
