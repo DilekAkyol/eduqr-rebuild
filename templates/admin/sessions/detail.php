@@ -491,6 +491,13 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                                 <button class="btn btn-custom-outline" onclick="document.getElementById('resume-session-form').submit();">▶️ <?= $locale === 'en' ? 'Resume' : 'Devam Ettir' ?></button>
                             <?php endif; ?>
 
+                            <form id="toggle-results-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/toggle-results') ?>" method="POST" style="display:none;"></form>
+                            <button class="btn <?= (int)($session['show_results_to_students'] ?? 1) === 1 ? 'btn-success bg-success bg-opacity-10 text-success border-success' : 'btn-custom-outline' ?>" onclick="document.getElementById('toggle-results-form').submit();">
+                                <?= (int)($session['show_results_to_students'] ?? 1) === 1
+                                    ? '👁️ ' . ($locale === 'en' ? 'Results: Visible' : 'Sonuçlar: Açık')
+                                    : '🙈 ' . ($locale === 'en' ? 'Results: Hidden' : 'Sonuçlar: Gizli') ?>
+                            </button>
+
                             <form id="close-session-form"
                                   action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/close') ?>"
                                   method="POST"

@@ -193,7 +193,41 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                         <div class="text-success fs-1 mb-3">✓</div>
                         <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.wait.answer_submitted')) ?></h4>
                         <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.wait.wait_for_next')) ?></p>
-                        <a href="" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= $locale === 'en' ? 'Refresh' : 'Sayfayı Yenile' ?></a>
+
+                        <?php if ($showResults && !empty($results) && !empty($activeQuestion['options']) && is_array($activeQuestion['options'])): ?>
+                            <!-- Static Live Results for Students -->
+                            <div class="mt-4 text-start mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 1.2rem;">
+                                <h5 class="fw-bold mb-3" style="font-size: 0.95rem;"><?= $locale === 'en' ? 'Live Results' : 'Canlı Sonuçlar' ?></h5>
+                                <?php
+                                $votesLookup = [];
+                                $totalVal = 0;
+                                foreach ($results as $r) {
+                                    $votesLookup[$r['answer_value']] = (int)$r['count'];
+                                    $totalVal += (int)$r['count'];
+                                }
+                                ?>
+                                <div class="d-flex flex-column gap-2.5">
+                                    <?php foreach ($activeQuestion['options'] as $idx => $opt): ?>
+                                        <?php
+                                        $char = chr(65 + $idx);
+                                        $count = $votesLookup[$char] ?? 0;
+                                        $pct = $totalVal > 0 ? round(($count / $totalVal) * 100) : 0;
+                                        ?>
+                                        <div class="mb-2">
+                                            <div class="d-flex justify-content-between mb-1 small text-muted">
+                                                <span><strong><?= $char ?>)</strong> <?= htmlspecialchars($opt) ?></span>
+                                                <span class="fw-semibold"><?= $count ?> (<?= $pct ?>%)</span>
+                                            </div>
+                                            <div class="progress bg-white bg-opacity-5" style="height: 8px; border-radius: 4px;">
+                                                <div class="progress-bar bg-primary" role="progressbar" style="width: <?= $pct ?>%; border-radius: 4px;" aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <a href="" class="btn btn-primary w-100 py-3" style="border-radius:12px;"><?= $locale === 'en' ? 'Refresh' : 'Sayfayı Yenile' ?></a>
                     </div>
                 <?php else: ?>
                     <!-- Question State -->
@@ -256,6 +290,12 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 <div class="text-success fs-1 mb-3">✓</div>
                 <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.wait.answer_submitted')) ?></h4>
                 <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.wait.wait_for_next')) ?></p>
+
+                <!-- Live Results inside answered state for students -->
+                <div id="student-results-container" class="mt-4 text-start d-none" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 1.2rem;">
+                    <h5 class="fw-bold mb-3" style="font-size: 0.95rem;"><?= $locale === 'en' ? 'Live Results' : 'Canlı Sonuçlar' ?></h5>
+                    <div id="student-results-bars" class="d-flex flex-column gap-2.5"></div>
+                </div>
             </div>
         </div>
         
@@ -310,6 +350,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                     if (data.has_answered) {
                         // Question active but student already voted
                         showState('answered');
+                        renderStudentResults(data);
                     } else {
                         // Voted false, render options
                         if (currentActiveQuestionId !== data.question.id) {
@@ -439,6 +480,45 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 console.error("Submit error:", err);
                 alert(translationConnectionError);
                 btns.forEach(b => b.disabled = false);
+            }
+        }
+
+        function renderStudentResults(data) {
+            const container = document.getElementById('student-results-container');
+            const bars = document.getElementById('student-results-bars');
+            
+            if (!container || !bars) return;
+
+            if (data.show_results && data.results && data.question && data.question.options) {
+                container.classList.remove('d-none');
+                
+                // Parse results lookup and sum total votes
+                const votesLookup = {};
+                let totalVal = 0;
+                data.results.forEach(r => {
+                    votesLookup[r.answer_value] = parseInt(r.count);
+                    totalVal += parseInt(r.count);
+                });
+
+                bars.innerHTML = '';
+                data.question.options.forEach((opt, idx) => {
+                    const char = String.fromCharCode(65 + idx);
+                    const count = votesLookup[char] || 0;
+                    const pct = totalVal > 0 ? Math.round((count / totalVal) * 100) : 0;
+                    bars.innerHTML += `
+                        <div class="mb-2 text-start">
+                            <div class="d-flex justify-content-between mb-1 small text-muted">
+                                <span><strong>${char})</strong> ${escapeHtml(opt)}</span>
+                                <span class="fw-semibold">${count} (${pct}%)</span>
+                            </div>
+                            <div class="progress bg-white bg-opacity-5" style="height: 8px; border-radius: 4px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: ${pct}%; border-radius: 4px; transition: width 0.4s ease;" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                container.classList.add('d-none');
             }
         }
 

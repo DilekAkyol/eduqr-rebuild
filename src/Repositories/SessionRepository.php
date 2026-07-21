@@ -70,4 +70,13 @@ final class SessionRepository
         $stmt = $this->db->prepare("UPDATE sessions SET is_anonymized = 1 WHERE id = :id");
         $stmt->execute(['id' => $id]);
     }
+
+    public function updateShowResults(int $id, int $val): void
+    {
+        $stmt = $this->db->prepare("UPDATE sessions SET show_results_to_students = :val WHERE id = :id");
+        $stmt->execute([
+            'val' => $val,
+            'id'  => $id,
+        ]);
+    }
 }

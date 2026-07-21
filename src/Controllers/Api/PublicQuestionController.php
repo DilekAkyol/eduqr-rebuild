@@ -55,10 +55,18 @@ final class PublicQuestionController
         // Öğrenci bu soruya zaten cevap vermiş mi?
         $hasAnswered = $this->answerRepo->findAnswer((int)$activeQuestion['id'], $participantId) !== null;
 
+        $showResults = (int)($session['show_results_to_students'] ?? 1) === 1;
+        $results = [];
+        if ($showResults && $hasAnswered && $activeQuestion['type'] !== 'open_ended') {
+            $results = $this->answerRepo->getResultsForQuestion((int)$activeQuestion['id']);
+        }
+
         echo json_encode([
             'active'       => true,
             'has_answered' => $hasAnswered,
             'session_status' => $session['status'],
+            'show_results' => $showResults,
+            'results'      => $results,
             'question'     => [
                 'id'            => $activeQuestion['id'],
                 'question_text' => $activeQuestion['question_text'],

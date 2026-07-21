@@ -226,8 +226,13 @@ final class JoinController
         // JS Devre dışı durumu için aktif soruyu çek
         $activeQuestion = $this->questionRepo->findActiveBySessionId((int)$session['id']);
         $hasAnswered = false;
+        $showResults = (int)($session['show_results_to_students'] ?? 1) === 1;
+        $results = [];
         if ($activeQuestion !== null) {
             $hasAnswered = $this->answerRepo->findAnswer((int)$activeQuestion['id'], $participantId) !== null;
+            if ($showResults && $hasAnswered && $activeQuestion['type'] !== 'open_ended') {
+                $results = $this->answerRepo->getResultsForQuestion((int)$activeQuestion['id']);
+            }
         }
 
         include __DIR__ . '/../../templates/student/wait.php';

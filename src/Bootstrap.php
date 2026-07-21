@@ -169,6 +169,11 @@ final class Bootstrap
             (new \EduQR\Controllers\SessionController())->resume($p);
         });
 
+        $router->post('/eduqr-rebuild/public/admin/sessions/{id}/toggle-results', function (array $p): void {
+            \EduQR\Middleware\AuthMiddleware::handle();
+            (new \EduQR\Controllers\SessionController())->toggleResults($p);
+        });
+
         $router->post('/eduqr-rebuild/public/admin/sessions/{id}/delete', function (array $p): void {
             \EduQR\Middleware\AuthMiddleware::handle();
             (new \EduQR\Controllers\ReportController())->delete($p);
