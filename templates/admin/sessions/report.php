@@ -439,7 +439,16 @@ $participationRate = $totalPossibleAnswers > 0
     <div class="content-area">
         <!-- Top Toolbar -->
         <div class="d-flex justify-content-between align-items-center mb-4 no-print">
-            <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-3"><?= htmlspecialchars(t('admin.report.back')) ?></a>
+            <div class="d-flex gap-2">
+                <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-3"><?= htmlspecialchars(t('admin.report.back')) ?></a>
+                <?php if (!(int)($session['is_anonymized'] ?? 0)): ?>
+                    <?php if (($_GET['anonymize'] ?? '') === 'true'): ?>
+                        <a href="?" class="btn btn-sm btn-primary rounded-3">🔓 <?= $locale === 'en' ? 'Show Real Names' : 'Gerçek İsimleri Göster' ?></a>
+                    <?php else: ?>
+                        <a href="?anonymize=true" class="btn btn-sm btn-outline-primary rounded-3">🔒 <?= $locale === 'en' ? 'Anonymize View' : 'Anonim Görünüm' ?></a>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
             
             <div class="d-flex align-items-center gap-3">
                 <!-- Theme and Language controls -->
@@ -671,7 +680,13 @@ $participationRate = $totalPossibleAnswers > 0
         <!-- Footer Actions Panel -->
         <div class="d-flex justify-content-between align-items-center mt-5 p-3 rounded-4 bg-white border no-print" style="background-color: var(--card-bg) !important; border: 1px solid var(--border-color) !important;">
             <div class="d-flex gap-2">
-                <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report/csv') ?>" class="btn-action text-decoration-none"><?= htmlspecialchars(t('admin.report.export_csv')) ?></a>
+                <?php
+                $csvUrl = eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report/csv');
+                if (($_GET['anonymize'] ?? '') === 'true') {
+                    $csvUrl .= '?anonymize=true';
+                }
+                ?>
+                <a href="<?= $csvUrl ?>" class="btn-action text-decoration-none"><?= htmlspecialchars(t('admin.report.export_csv')) ?></a>
                 <button onclick="window.print()" class="btn-action"><?= htmlspecialchars(t('admin.report.export_pdf')) ?></button>
             </div>
         </div>

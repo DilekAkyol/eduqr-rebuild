@@ -60,17 +60,45 @@ final class ReportController
 
         $questions = $this->questionRepo->findBySessionId($sessionId);
         
+        $anonymize = ((int)($session['is_anonymized'] ?? 0) === 1) || (($_GET['anonymize'] ?? '') === 'true');
+        
         // Katılımcıları listele
         $db = \EduQR\Support\Database::connect();
         $stmt = $db->prepare("SELECT * FROM participants WHERE session_id = :session_id ORDER BY created_at ASC");
         $stmt->execute(['session_id' => $sessionId]);
         $participants = $stmt->fetchAll() ?: [];
 
+        // Dinamik anonimleştirme haritası
+        $participantMapping = [];
+        $participantCounter = 1;
+
+        if ($anonymize) {
+            foreach ($participants as &$p) {
+                $orig = $p['nickname'];
+                if (!isset($participantMapping[$orig])) {
+                    $participantMapping[$orig] = 'Katılımcı ' . $participantCounter++;
+                }
+                $p['nickname'] = $participantMapping[$orig];
+            }
+            unset($p);
+        }
+
         // Her bir soru için oylama sonuçlarını çek
         $results = [];
         foreach ($questions as $q) {
             if ($q['type'] === 'open_ended') {
-                $results[$q['id']] = $this->answerRepo->getAnswersForQuestion((int)$q['id']);
+                $answers = $this->answerRepo->getAnswersForQuestion((int)$q['id']);
+                if ($anonymize) {
+                    foreach ($answers as &$ans) {
+                        $orig = $ans['nickname'];
+                        if (!isset($participantMapping[$orig])) {
+                            $participantMapping[$orig] = 'Katılımcı ' . $participantCounter++;
+                        }
+                        $ans['nickname'] = $participantMapping[$orig];
+                    }
+                    unset($ans);
+                }
+                $results[$q['id']] = $answers;
             } else {
                 $results[$q['id']] = $this->answerRepo->getResultsForQuestion((int)$q['id']);
             }
@@ -115,7 +143,9 @@ final class ReportController
         // UTF-8 BOM to display Turkish characters properly in Excel
         fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
-        // Map unique nicknames to sequential anonymous identifiers to protect privacy from teacher
+        $anonymize = ((int)($session['is_anonymized'] ?? 0) === 1) || (($_GET['anonymize'] ?? '') === 'true');
+
+        // Map unique nicknames to sequential anonymous identifiers to protect privacy if anonymization is active
         $participantMapping = [];
         $participantCounter = 1;
 
@@ -124,13 +154,17 @@ final class ReportController
 
         foreach ($rows as $row) {
             $origNickname = $row['nickname'];
-            if (!isset($participantMapping[$origNickname])) {
-                $participantMapping[$origNickname] = 'Katılımcı ' . $participantCounter++;
+            if ($anonymize) {
+                if (!isset($participantMapping[$origNickname])) {
+                    $participantMapping[$origNickname] = 'Katılımcı ' . $participantCounter++;
+                }
+                $displayName = $participantMapping[$origNickname];
+            } else {
+                $displayName = $origNickname;
             }
-            $anonName = $participantMapping[$origNickname];
 
             fputcsv($output, [
-                $anonName,
+                $displayName,
                 $row['question_text'],
                 $row['answer_value'],
                 $row['created_at']
