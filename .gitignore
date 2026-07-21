@@ -30,3 +30,7 @@ Desktop.ini
 # Cloudflare binary
 cloudflared.exe
 
+# Database backups
+/backups/
+
+

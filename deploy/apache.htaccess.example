@@ -1,0 +1,36 @@
+# eduQR Apache htaccess Example Configuration
+
+# 1. Prevent directory listings
+Options -Indexes
+
+# 2. Prevent access to system and sensitive directories (NFR-60)
+RedirectMatch 404 ^/\.env
+RedirectMatch 404 ^/\.git
+RedirectMatch 404 ^/src/
+RedirectMatch 404 ^/templates/
+RedirectMatch 404 ^/database/
+RedirectMatch 404 ^/bin/
+RedirectMatch 404 ^/backups/
+RedirectMatch 404 ^/locales/
+
+# 3. Route all non-file/non-directory requests to the public router
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # If the request is not for a real file or directory
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Rewrite to the entry point in the public folder
+    RewriteRule ^(.*)$ public/index.php [L,QSA]
+</IfModule>
+
+# 4. Global Security Headers (NFR-25)
+<IfModule mod_headers.c>
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self';"
+</IfModule>
