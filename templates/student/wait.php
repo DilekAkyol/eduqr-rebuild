@@ -174,9 +174,9 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 <!-- Paused State -->
                 <div>
                     <div class="glow-spinner" style="animation: none; box-shadow: none; border-color: #f59e0b;"></div>
-                    <h4 class="fw-bold mb-3" style="color: #f59e0b;">⏸️ <?= $locale === 'en' ? 'Session Paused' : 'Oturum Duraklatıldı' ?></h4>
-                    <p class="text-muted mb-4 small px-3"><?= $locale === 'en' ? 'The instructor has paused the session. Please wait.' : 'Öğretmen oturumu geçici olarak duraklattı. Lütfen bekleyin.' ?></p>
-                    <a href="" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= $locale === 'en' ? 'Refresh' : 'Sayfayı Yenile' ?></a>
+                    <h4 class="fw-bold mb-3" style="color: #f59e0b;">⏸️ <?= htmlspecialchars(t('student.wait.session_paused_title'), ENT_QUOTES, 'UTF-8') ?></h4>
+                    <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.wait.session_paused_desc'), ENT_QUOTES, 'UTF-8') ?></p>
+                    <a href="" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= htmlspecialchars(t('student.wait.refresh_btn'), ENT_QUOTES, 'UTF-8') ?></a>
                 </div>
             <?php elseif ($activeQuestion === null): ?>
                 <!-- Wait State -->
@@ -184,7 +184,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                     <div class="glow-spinner" style="animation: none; box-shadow: none; border-color: #3b82f6;"></div>
                     <h4 class="fw-bold mb-3"><?= htmlspecialchars(t('student.join.waiting')) ?></h4>
                     <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.join.waiting_desc')) ?></p>
-                    <a href="" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= $locale === 'en' ? 'Refresh' : 'Sayfayı Yenile' ?></a>
+                    <a href="" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= htmlspecialchars(t('student.wait.refresh_btn'), ENT_QUOTES, 'UTF-8') ?></a>
                 </div>
             <?php else: ?>
                 <?php if ($hasAnswered): ?>
@@ -197,7 +197,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                         <?php if ($showResults && !empty($results) && !empty($activeQuestion['options']) && is_array($activeQuestion['options'])): ?>
                             <!-- Static Live Results for Students -->
                             <div class="mt-4 text-start mb-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 1.2rem;">
-                                <h5 class="fw-bold mb-3" style="font-size: 0.95rem;"><?= $locale === 'en' ? 'Live Results' : 'Canlı Sonuçlar' ?></h5>
+                                <h5 class="fw-bold mb-3" style="font-size: 0.95rem;"><?= htmlspecialchars(t('student.wait.live_results'), ENT_QUOTES, 'UTF-8') ?></h5>
                                 <?php
                                 $votesLookup = [];
                                 $totalVal = 0;
@@ -227,7 +227,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                             </div>
                         <?php endif; ?>
 
-                        <a href="" class="btn btn-primary w-100 py-3" style="border-radius:12px;"><?= $locale === 'en' ? 'Refresh' : 'Sayfayı Yenile' ?></a>
+                        <a href="" class="btn btn-primary w-100 py-3" style="border-radius:12px;"><?= htmlspecialchars(t('student.wait.refresh_btn'), ENT_QUOTES, 'UTF-8') ?></a>
                     </div>
                 <?php else: ?>
                     <!-- Question State -->
@@ -241,9 +241,9 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                             <input type="hidden" name="question_id" value="<?= (int)$activeQuestion['id'] ?>">
                             <?php if ($activeQuestion['type'] === 'open_ended'): ?>
                                 <div class="mb-3">
-                                    <textarea name="answer_value" class="form-control" rows="4" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--card-border); border-radius:12px;" placeholder="<?= $locale === 'en' ? 'Write your response here...' : 'Buraya cevabınızı yazın...' ?>" required></textarea>
+                                    <textarea name="answer_value" class="form-control" rows="4" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--card-border); border-radius:12px;" placeholder="<?= htmlspecialchars(t('student.wait.write_response_placeholder'), ENT_QUOTES, 'UTF-8') ?>" required></textarea>
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= $locale === 'en' ? 'Submit Response' : 'Cevabı Gönder' ?></button>
+                                <button type="submit" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= htmlspecialchars(t('student.wait.submit_response_btn'), ENT_QUOTES, 'UTF-8') ?></button>
                             <?php elseif (!empty($activeQuestion['options']) && is_array($activeQuestion['options'])): ?>
                                 <?php foreach ($activeQuestion['options'] as $idx => $opt): ?>
                                     <?php $char = chr(65 + $idx); ?>
@@ -269,8 +269,8 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             <!-- Paused State -->
             <div id="paused-state" class="d-none">
                 <div class="glow-spinner" style="animation: none; box-shadow: none; border-color: #f59e0b;"></div>
-                <h4 class="fw-bold mb-3" style="color: #f59e0b;">⏸️ <?= $locale === 'en' ? 'Session Paused' : 'Oturum Duraklatıldı' ?></h4>
-                <p class="text-muted mb-4 small px-3"><?= $locale === 'en' ? 'The instructor has paused the session. Please wait.' : 'Öğretmen oturumu geçici olarak duraklattı. Lütfen bekleyin.' ?></p>
+                <h4 class="fw-bold mb-3" style="color: #f59e0b;">⏸️ <?= htmlspecialchars(t('student.wait.session_paused_title'), ENT_QUOTES, 'UTF-8') ?></h4>
+                <p class="text-muted mb-4 small px-3"><?= htmlspecialchars(t('student.wait.session_paused_desc'), ENT_QUOTES, 'UTF-8') ?></p>
             </div>
 
             <!-- Question View State (Hidden initially) -->
@@ -293,7 +293,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
 
                 <!-- Live Results inside answered state for students -->
                 <div id="student-results-container" class="mt-4 text-start d-none" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 1.2rem;">
-                    <h5 class="fw-bold mb-3" style="font-size: 0.95rem;"><?= $locale === 'en' ? 'Live Results' : 'Canlı Sonuçlar' ?></h5>
+                    <h5 class="fw-bold mb-3" style="font-size: 0.95rem;"><?= htmlspecialchars(t('student.wait.live_results'), ENT_QUOTES, 'UTF-8') ?></h5>
                     <div id="student-results-bars" class="d-flex flex-column gap-2.5"></div>
                 </div>
             </div>
@@ -314,6 +314,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         // Localized JS variables
         const translationSubmitFailed = <?= json_encode(t('student.wait.submit_failed')) ?>;
         const translationConnectionError = <?= json_encode(t('student.wait.connection_error')) ?>;
+        const translationWriteResponseAlert = <?= json_encode(t('student.wait.write_response_alert')) ?>;
 
         document.getElementById('js-container').style.display = 'block';
 
@@ -400,9 +401,9 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             if (q.type === 'open_ended') {
                 optionsContainer.innerHTML = `
                     <div class="mb-3">
-                        <textarea id="open-ended-answer" class="form-control" rows="4" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--card-border); border-radius:12px;" placeholder="${locale === 'en' ? 'Write your response here...' : 'Buraya cevabınızı yazın...'}" required></textarea>
+                        <textarea id="open-ended-answer" class="form-control" rows="4" style="background:var(--card-bg); color:var(--text-main); border:1px solid var(--card-border); border-radius:12px;" placeholder="<?= htmlspecialchars(t('student.wait.write_response_placeholder'), ENT_QUOTES, 'UTF-8') ?>" required></textarea>
                     </div>
-                    <button onclick="submitOpenEndedAnswer(${q.id})" id="btn-submit-answer" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;">${locale === 'en' ? 'Submit Response' : 'Cevabı Gönder'}</button>
+                    <button onclick="submitOpenEndedAnswer(${q.id})" id="btn-submit-answer" class="btn btn-primary w-100 py-3 mt-2" style="border-radius:12px;"><?= htmlspecialchars(t('student.wait.submit_response_btn'), ENT_QUOTES, 'UTF-8') ?></button>
                 `;
             } else if (q.options && Array.isArray(q.options)) {
                 q.options.forEach((opt, idx) => {
@@ -420,7 +421,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             const textarea = document.getElementById('open-ended-answer');
             const answerVal = textarea.value.trim();
             if (!answerVal) {
-                alert(locale === 'en' ? 'Please write your response first.' : 'Lütfen önce cevabınızı yazın.');
+                alert(translationWriteResponseAlert);
                 return;
             }
 

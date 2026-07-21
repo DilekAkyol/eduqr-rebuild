@@ -223,5 +223,20 @@
     "auth.login.forgot_password_submit_reset": "Şifreyi Güncelle",
     "auth.login.forgot_password_reset_success": "Şifreniz başarıyla güncellendi! Giriş yapabilirsiniz.",
     "auth.login.forgot_password_error_mismatch": "Şifreler uyuşmuyor.",
-    "auth.login.forgot_password_error_invalid_code": "Sıfırlama kodu geçersiz veya süresi dolmuş."
+    "auth.login.forgot_password_error_invalid_code": "Sıfırlama kodu geçersiz veya süresi dolmuş.",
+    "error.page_not_found.title": "Sayfa Bulunamadı",
+    "error.page_not_found.desc": "Aradığınız sayfa mevcut değil veya kaldırılmış.",
+    "error.server_error.title": "Sunucu Hatası",
+    "error.server_error.desc": "Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin.",
+    "error.go_to_dashboard": "Panele Dön",
+    "student.join.choose_nickname": "Bir Takma Ad (Nickname) Seçin",
+    "student.join.nickname_placeholder": "Takma adınızı yazın...",
+    "student.join.submit_btn": "Oturuma Katıl",
+    "student.wait.session_paused_title": "Oturum Duraklatıldı",
+    "student.wait.session_paused_desc": "Öğretmen oturumu geçici olarak duraklattı. Lütfen bekleyin.",
+    "student.wait.refresh_btn": "Sayfayı Yenile",
+    "student.wait.live_results": "Canlı Sonuçlar",
+    "student.wait.write_response_placeholder": "Buraya cevabınızı yazın...",
+    "student.wait.submit_response_btn": "Cevabı Gönder",
+    "student.wait.write_response_alert": "Lütfen önce cevabınızı yazın."
 }

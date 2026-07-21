@@ -223,5 +223,20 @@
     "auth.login.forgot_password_submit_reset": "Update Password",
     "auth.login.forgot_password_reset_success": "Your password has been successfully reset! You can now log in.",
     "auth.login.forgot_password_error_mismatch": "Passwords do not match.",
-    "auth.login.forgot_password_error_invalid_code": "Reset code is invalid or has expired."
+    "auth.login.forgot_password_error_invalid_code": "Reset code is invalid or has expired.",
+    "error.page_not_found.title": "Page Not Found",
+    "error.page_not_found.desc": "The page you are looking for does not exist or has been removed.",
+    "error.server_error.title": "Server Error",
+    "error.server_error.desc": "Something went wrong. Please try again later.",
+    "error.go_to_dashboard": "Go to Dashboard",
+    "student.join.choose_nickname": "Choose a Nickname",
+    "student.join.nickname_placeholder": "Enter nickname...",
+    "student.join.submit_btn": "Join Session",
+    "student.wait.session_paused_title": "Session Paused",
+    "student.wait.session_paused_desc": "The instructor has paused the session. Please wait.",
+    "student.wait.refresh_btn": "Refresh",
+    "student.wait.live_results": "Live Results",
+    "student.wait.write_response_placeholder": "Write your response here...",
+    "student.wait.submit_response_btn": "Submit Response",
+    "student.wait.write_response_alert": "Please write your response first."
 }

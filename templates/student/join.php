@@ -174,13 +174,13 @@ $locale = \EduQR\I18n\I18nService::getLocale();
 
         <form action="<?= eduqr_path('/join/' . $session['short_code']) ?>" method="POST" class="text-start">
             <div class="mb-3">
-                <label for="nickname" class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Choose a Nickname' : 'Bir Takma Ad (Nickname) Seçin' ?></label>
+                <label for="nickname" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('student.join.choose_nickname'), ENT_QUOTES, 'UTF-8') ?></label>
                 <input type="text" class="form-control <?= isset($error) ? 'is-invalid' : '' ?>" id="nickname" name="nickname" required
-                       placeholder="<?= $locale === 'en' ? 'Enter nickname...' : 'Takma adınızı yazın...' ?>"
+                       placeholder="<?= htmlspecialchars(t('student.join.nickname_placeholder'), ENT_QUOTES, 'UTF-8') ?>"
                        value="<?= htmlspecialchars($_POST['nickname'] ?? '') ?>"
                        autocomplete="off" maxlength="30">
             </div>
-            <button type="submit" class="btn btn-primary w-100"><?= $locale === 'en' ? 'Join Session' : 'Oturuma Katıl' ?></button>
+            <button type="submit" class="btn btn-primary w-100"><?= htmlspecialchars(t('student.join.submit_btn'), ENT_QUOTES, 'UTF-8') ?></button>
         </form>
 
         <!-- Privacy Notice -->
