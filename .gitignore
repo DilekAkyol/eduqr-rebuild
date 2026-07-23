@@ -33,4 +33,8 @@ cloudflared.exe
 # Database backups
 /backups/
 
+# Testing cache and environment
+.env.testing
+.phpunit.cache/
+
 
