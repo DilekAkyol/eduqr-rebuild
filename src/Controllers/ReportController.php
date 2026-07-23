@@ -45,14 +45,14 @@ final class ReportController
         $session = $this->sessionRepo->findById($sessionId);
         if ($session === null) {
             http_response_code(404);
-            echo "Session not found.";
+            echo htmlspecialchars(t('error.session_not_found'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 
         $course = $this->courseRepo->findByIdAndUserId((int)$session['course_id'], $user['id']);
         if ($course === null) {
             http_response_code(403);
-            echo "Access denied.";
+            echo htmlspecialchars(t('error.unauthorized'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 
@@ -219,7 +219,7 @@ final class ReportController
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -229,13 +229,13 @@ final class ReportController
 
         $session = $this->sessionRepo->findById($sessionId);
         if ($session === null) {
-            echo json_encode(['success' => false, 'error' => 'Oturum bulunamadı.']);
+            echo json_encode(['success' => false, 'error' => t('error.session_not_found')]);
             exit;
         }
 
         $course = $this->courseRepo->findByIdAndUserId((int)$session['course_id'], $user['id']);
         if ($course === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -275,7 +275,7 @@ final class ReportController
 
         $apiKey = \EduQR\Config::get('GEMINI_API_KEY', '');
         if ($apiKey === '') {
-            echo json_encode(['success' => false, 'error' => 'GEMINI_API_KEY .env dosyasında tanımlanmamış.']);
+            echo json_encode(['success' => false, 'error' => t('error.gemini_key_missing')]);
             exit;
         }
 
@@ -311,7 +311,7 @@ final class ReportController
         if ($httpStatus !== 200) {
             $errData = json_decode((string)$response, true);
             $errMsg = $errData['error']['message'] ?? 'Bilinmeyen API hatası';
-            echo json_encode(['success' => false, 'error' => 'Gemini API Hatası: ' . $errMsg]);
+            echo json_encode(['success' => false, 'error' => t('error.gemini_api_error', ['message' => $errMsg])]);
             exit;
         }
 
@@ -319,7 +319,7 @@ final class ReportController
         $rawText = $geminiData['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
         if (trim($rawText) === '') {
-            echo json_encode(['success' => false, 'error' => 'Gemini boş bir yanıt döndürdü.']);
+            echo json_encode(['success' => false, 'error' => t('error.gemini_empty')]);
             exit;
         }
 

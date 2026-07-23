@@ -36,13 +36,13 @@ final class SessionController
 
         if ($course === null) {
             http_response_code(403);
-            echo "Access denied.";
+            echo htmlspecialchars(t('error.unauthorized'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 
         $title = trim($_POST['title'] ?? '');
         if ($title === '') {
-            $title = 'Yeni Oturum';
+            $title = t('admin.session.new_session_title_default');
         }
 
         // 6 haneli benzersiz kısa kod üret (çakışma durumunda tekrar dene)
@@ -58,7 +58,7 @@ final class SessionController
 
         if ($shortCode === '') {
             http_response_code(500);
-            echo "Failed to generate unique short code.";
+            echo htmlspecialchars(t('error.failed_generate_shortcode'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 
@@ -81,14 +81,14 @@ final class SessionController
 
         if ($session === null) {
             http_response_code(404);
-            echo "Session not found.";
+            echo htmlspecialchars(t('error.session_not_found'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 
         $course = $this->courseRepo->findByIdAndUserId((int)$session['course_id'], $user['id']);
         if ($course === null) {
             http_response_code(403);
-            echo "Access denied.";
+            echo htmlspecialchars(t('error.unauthorized'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 

@@ -409,7 +409,7 @@ final class AuthController
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -421,7 +421,7 @@ final class AuthController
         $confirmPassword = $body['confirm_password'] ?? $_POST['confirm_password'] ?? '';
 
         if ($oldPassword === '' || $newPassword === '' || $confirmPassword === '') {
-            echo json_encode(['success' => false, 'error' => 'Tüm alanlar zorunludur.']);
+            echo json_encode(['success' => false, 'error' => t('error.all_fields_required')]);
             exit;
         }
 
@@ -452,7 +452,7 @@ final class AuthController
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -463,7 +463,7 @@ final class AuthController
         $email = trim($body['email'] ?? $_POST['email'] ?? '');
 
         if ($name === '' || $email === '') {
-            echo json_encode(['success' => false, 'error' => 'Tüm alanlar zorunludur.']);
+            echo json_encode(['success' => false, 'error' => t('error.all_fields_required')]);
             exit;
         }
 
@@ -471,7 +471,7 @@ final class AuthController
         $dbUser = $userRepo->findById((int)$user['id']);
 
         if ($dbUser === null) {
-            echo json_encode(['success' => false, 'error' => 'Kullanıcı bulunamadı.']);
+            echo json_encode(['success' => false, 'error' => t('error.user_not_found')]);
             exit;
         }
 
@@ -479,7 +479,7 @@ final class AuthController
         if ($email !== $dbUser['email']) {
             $existing = $userRepo->findByEmail($email);
             if ($existing !== null) {
-                echo json_encode(['success' => false, 'error' => 'Bu e-posta adresi zaten kullanılıyor.']);
+                echo json_encode(['success' => false, 'error' => t('error.email_in_use')]);
                 exit;
             }
         }
@@ -502,7 +502,7 @@ final class AuthController
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -511,7 +511,7 @@ final class AuthController
         $password = $body['password'] ?? '';
 
         if ($password === '') {
-            echo json_encode(['success' => false, 'error' => 'Şifre zorunludur.']);
+            echo json_encode(['success' => false, 'error' => t('error.password_required')]);
             exit;
         }
 
@@ -519,7 +519,7 @@ final class AuthController
         $dbUser   = $userRepo->findById((int)$user['id']);
 
         if ($dbUser === null || !password_verify($password, $dbUser['password_hash'])) {
-            echo json_encode(['success' => false, 'error' => 'Şifre hatalı. Hesap silinmedi.']);
+            echo json_encode(['success' => false, 'error' => t('error.incorrect_password_delete')]);
             exit;
         }
 

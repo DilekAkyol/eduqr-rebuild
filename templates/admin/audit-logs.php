@@ -8,7 +8,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $locale === 'en' ? 'Audit Logs' : 'Denetim Kayıtları' ?> - eduQR</title>
+    <title><?= htmlspecialchars(t('admin.audit.title')) ?> - eduQR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>(function(){const t=localStorage.getItem('eduqr_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t)})();</script>
@@ -49,24 +49,24 @@ $locale = \EduQR\I18n\I18nService::getLocale();
     <div class="sidebar no-print">
         <a href="<?= eduqr_path('/admin/dashboard') ?>" class="sidebar-logo"><div class="sidebar-logo-icon">❖</div><span>eduQR</span></a>
         <div class="nav-menu">
-            <a href="<?= eduqr_path('/admin/dashboard') ?>" class="nav-item-custom"><?= $locale === 'en' ? 'Courses' : 'Dersler' ?></a>
-            <a href="<?= eduqr_path('/admin/question-bank') ?>" class="nav-item-custom"><?= $locale === 'en' ? 'Question Bank' : 'Soru Bankası' ?></a>
-            <a href="<?= eduqr_path('/admin/audit-logs') ?>" class="nav-item-custom active"><?= $locale === 'en' ? 'Audit Logs' : 'Denetim Kayıtları' ?></a>
-            <a href="<?= eduqr_path('/admin/archive') ?>" class="nav-item-custom"><?= $locale === 'en' ? 'Archive' : 'Arşiv' ?></a>
-            <a href="<?= eduqr_path('/admin/settings') ?>" class="nav-item-custom"><?= $locale === 'en' ? 'Settings' : 'Ayarlar' ?></a>
+            <a href="<?= eduqr_path('/admin/dashboard') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.dashboard.title')) ?></a>
+            <a href="<?= eduqr_path('/admin/question-bank') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.qbank.bank_title')) ?></a>
+            <a href="<?= eduqr_path('/admin/audit-logs') ?>" class="nav-item-custom active"><?= htmlspecialchars(t('admin.audit.title')) ?></a>
+            <a href="<?= eduqr_path('/admin/archive') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_archive')) ?></a>
+            <a href="<?= eduqr_path('/admin/settings') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.settings.title')) ?></a>
         </div>
         <div class="sidebar-footer">
             <div class="profile-img">👤</div>
-            <div><div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? '') ?></div><div class="text-muted small"><?= $locale === 'en' ? 'Instructor' : 'Öğretmen' ?></div></div>
+            <div><div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? '') ?></div><div class="text-muted small"><?= htmlspecialchars(t('admin.report.sidebar_admin')) ?></div></div>
         </div>
     </div>
     <div class="content-area">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold"><?= $locale === 'en' ? 'Audit Logs' : 'Denetim Kayıtları' ?></h2>
+            <h2 class="fw-bold"><?= htmlspecialchars(t('admin.audit.title')) ?></h2>
         </div>
         <div class="card-custom">
             <div id="logs-container">
-                <p class="text-muted"><?= $locale === 'en' ? 'Loading...' : 'Yükleniyor...' ?></p>
+                <p class="text-muted"><?= htmlspecialchars(t('common.loading')) ?></p>
             </div>
         </div>
     </div>
@@ -78,10 +78,10 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 const data = await res.json();
                 const container = document.getElementById('logs-container');
                 if (!data.success || !data.logs.length) {
-                    container.innerHTML = '<p class="text-muted"><?= $locale === 'en' ? 'No audit logs found.' : 'Hiç denetim kaydı bulunamadı.' ?></p>';
+                    container.innerHTML = '<p class="text-muted"><?= htmlspecialchars(t('admin.audit.no_logs')) ?></p>';
                     return;
                 }
-                let html = `<p class="text-muted small mb-3">${data.total} <?= $locale === 'en' ? 'total entries' : 'toplam kayıt' ?></p>`;
+                let html = `<p class="text-muted small mb-3">\${data.total} <?= htmlspecialchars(t('admin.audit.total_entries')) ?></p>`;
                 data.logs.forEach(log => {
                     const time = new Date(log.created_at + ' UTC').toLocaleString('tr-TR');
                     html += `<div class="log-entry d-flex justify-content-between align-items-start">
@@ -92,7 +92,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 });
                 container.innerHTML = html;
             } catch (e) {
-                document.getElementById('logs-container').innerHTML = '<p class="text-danger"><?= $locale === 'en' ? 'Failed to load logs.' : 'Kayıtlar yüklenemedi.' ?></p>';
+                document.getElementById('logs-container').innerHTML = '<p class="text-danger"><?= htmlspecialchars(t('admin.audit.failed')) ?></p>';
             }
         }
         function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }

@@ -15,11 +15,12 @@ final class Bootstrap
 
         // 1.75 CSRF Koruması (sadece normal form POST isteklerinde, API/ngrok isteklerini atla)
         $host = $_SERVER['HTTP_HOST'] ?? '';
-        $isApiOrNgrok = strpos($host, 'ngrok') !== false || strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') === 0;
+        $isApiOrNgrok = strpos($host, 'ngrok') !== false || strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false;
+        $isStudent = strpos($_SERVER['REQUEST_URI'] ?? '', '/join') !== false;
         $isJson = ($_SERVER['CONTENT_TYPE'] ?? '') === 'application/json';
         $isMultipart = str_starts_with($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/form-data');
         $isAjax = ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiOrNgrok && !$isJson && !$isAjax && !$isMultipart) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isApiOrNgrok && !$isStudent && !$isJson && !$isAjax && !$isMultipart) {
             \EduQR\Middleware\CsrfMiddleware::validate();
         }
 
@@ -315,7 +316,7 @@ final class Bootstrap
             header('Content-Type: application/json; charset=utf-8');
             $user = \EduQR\Services\AuthService::user();
             if ($user === null) {
-                echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+                echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
                 exit;
             }
             $limit = (int)($_GET['limit'] ?? 50);

@@ -60,22 +60,24 @@ final class JoinController
 
         if ($session === null) {
             http_response_code(404);
-            echo "<h1>Oturum Bulunamadı (404)</h1>";
+            $title = t('student.join.session_not_found');
+            $desc = t('student.join.session_not_found_desc');
+            echo "<h1>" . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</h1><p>" . htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') . "</p>";
             exit;
         }
 
         $locale = \EduQR\I18n\I18nService::getLocale();
         if ($session['status'] === 'closed') {
-            $title = $locale === 'en' ? 'Session Closed' : 'Oturum Sonlandırılmış';
-            $desc = $locale === 'en' ? 'This voting session has been closed by the instructor.' : 'Bu oylama oturumu öğretmen tarafından kapatılmıştır.';
-            echo "<h1>" . htmlspecialchars($title) . "</h1><p>" . htmlspecialchars($desc) . "</p>";
+            $title = t('student.wait.session_closed_title');
+            $desc = t('student.join.session_closed_desc');
+            echo "<h1>" . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</h1><p>" . htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') . "</p>";
             exit;
         }
 
         if ($session['status'] === 'paused') {
-            $title = $locale === 'en' ? 'Session Paused' : 'Oturum Duraklatıldı';
-            $desc = $locale === 'en' ? 'This voting session is currently paused by the instructor. Please try again later.' : 'Bu oylama oturumu öğretmen tarafından geçici olarak duraklatılmıştır. Lütfen daha sonra tekrar deneyin.';
-            echo "<h1>" . htmlspecialchars($title) . "</h1><p>" . htmlspecialchars($desc) . "</p>";
+            $title = t('student.wait.session_paused_title');
+            $desc = t('student.join.session_paused_desc');
+            echo "<h1>" . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . "</h1><p>" . htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') . "</p>";
             exit;
         }
 
@@ -162,9 +164,7 @@ final class JoinController
         if (!str_starts_with($nickname, 'anon-')) {
             $filter = new ProfanityFilter();
             if ($filter->contains($nickname)) {
-                $error = $locale === 'en'
-                    ? 'This nickname contains inappropriate language. Please choose a different one.'
-                    : 'Bu rumuz uygunsuz bir ifade içeriyor. Lütfen farklı bir rumuz seçin.';
+                $error = t('student.join.profanity_blocked');
                 include __DIR__ . '/../../templates/student/join.php';
                 exit;
             }
@@ -179,9 +179,7 @@ final class JoinController
             // Başka bir cihaz bu rumuzu daha önce aldı mı? (case-insensitive, FR-42)
             $takenBy = $this->participantRepo->findBySessionIdAndNickname((int)$session['id'], $nickname);
             if ($takenBy !== null) {
-                $error = $locale === 'en'
-                    ? 'This nickname is already taken! Please choose a different one.'
-                    : 'Bu rumuz zaten alınmış! Lütfen farklı bir rumuz seçin.';
+                $error = t('student.join.nickname_taken');
                 include __DIR__ . '/../../templates/student/join.php';
                 exit;
             }

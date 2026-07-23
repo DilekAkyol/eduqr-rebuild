@@ -103,7 +103,7 @@ final class CourseController
     {
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -111,7 +111,7 @@ final class CourseController
         $course = $this->courseRepo->findByIdAndUserId($courseId, $user['id']);
 
         if ($course === null) {
-            echo json_encode(['success' => false, 'error' => 'Ders bulunamadı']);
+            echo json_encode(['success' => false, 'error' => t('error.course_not_found')]);
             exit;
         }
 
@@ -126,7 +126,7 @@ final class CourseController
     {
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -134,7 +134,7 @@ final class CourseController
         $course = $this->courseRepo->findByIdAndUserId($courseId, $user['id']);
 
         if ($course === null) {
-            echo json_encode(['success' => false, 'error' => 'Ders bulunamadı']);
+            echo json_encode(['success' => false, 'error' => t('error.course_not_found')]);
             exit;
         }
 

@@ -342,7 +342,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         <div class="sidebar-footer">
             <div class="profile-img">👤</div>
             <div>
-                <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? ($locale === 'en' ? 'Instructor' : 'Öğretmen')) ?></div>
+                <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? t('admin.report.sidebar_admin')) ?></div>
                 <div class="text-muted small" style="font-size: 0.75rem;"><?= htmlspecialchars(t('admin.report.sidebar_admin')) ?></div>
             </div>
         </div>
@@ -448,6 +448,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="<?= eduqr_path('/admin/courses/' . (int)$course['id'] . '/sessions') ?>" method="POST">
+                    <?= csrf_field() ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="session_title" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.course.session_subject')) ?></label>

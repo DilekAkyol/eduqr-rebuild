@@ -7,7 +7,7 @@ $courseRepo = new CourseRepository();
 $courses = $courseRepo->findByUserId((int)$user['id']);
 $totalCourses = count($courses);
 $locale = \EduQR\I18n\I18nService::getLocale();
-$defaultName = ($locale === 'en') ? 'Instructor' : 'Öğretmen';
+$defaultName = t('admin.report.sidebar_admin');
 ?>
 <!DOCTYPE html>
 <html lang="<?= $locale ?>">
@@ -442,14 +442,14 @@ $defaultName = ($locale === 'en') ? 'Instructor' : 'Öğretmen';
             <a href="<?= eduqr_path('/admin/question-bank') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_qbank')) ?></a>
             <a href="<?= $recentSessionId ? eduqr_path('/admin/sessions/' . $recentSessionId . '/report#participant-list-card') : '#' ?>" class="nav-item-custom<?= !$recentSessionId ? ' disabled' : '' ?>"><?= htmlspecialchars(t('admin.report.sidebar_participants')) ?></a>
             <a href="<?= $recentSessionId ? eduqr_path('/admin/sessions/' . $recentSessionId) : '#' ?>" class="nav-item-custom<?= !$recentSessionId ? ' disabled' : '' ?>"><?= htmlspecialchars(t('admin.report.live_session_nav')) ?></a>
-            <a href="<?= eduqr_path('/admin/audit-logs') ?>" class="nav-item-custom"><?= $locale === 'en' ? 'Audit Logs' : 'Denetim Kayıtları' ?></a>
+            <a href="<?= eduqr_path('/admin/audit-logs') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.audit.title')) ?></a>
             <a href="<?= eduqr_path('/admin/archive') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_archive')) ?></a>
             <a href="<?= eduqr_path('/admin/settings') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_settings')) ?></a>
         </div>
         <div class="sidebar-footer">
             <div class="profile-img">👤</div>
             <div>
-                <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? ($locale === 'en' ? 'Instructor' : 'Öğretmen')) ?></div>
+                <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? t('admin.report.sidebar_admin')) ?></div>
                 <div class="text-muted small" style="font-size: 0.75rem;"><?= htmlspecialchars(t('admin.report.sidebar_admin')) ?></div>
             </div>
         </div>
@@ -519,7 +519,7 @@ $defaultName = ($locale === 'en') ? 'Instructor' : 'Öğretmen';
                                         </div>
                                         <div>
                                             <button class="btn btn-sm btn-outline-danger border-opacity-10 py-2 px-3 rounded-3 me-2" onclick="handleArchive(event, <?= (int)$course['id'] ?>)">
-                                                <?= $locale === 'en' ? 'Archive' : 'Arşivle' ?>
+                                                <?= htmlspecialchars(t('admin.dashboard.archive_action')) ?>
                                             </button>
                                             <span class="btn btn-sm btn-custom-outline py-2 px-3 rounded-3"><?= htmlspecialchars(t('admin.dashboard.examine')) ?></span>
                                         </div>
@@ -629,7 +629,7 @@ $defaultName = ($locale === 'en') ? 'Instructor' : 'Öğretmen';
             event.preventDefault();
             event.stopPropagation();
 
-            if (!confirm('<?= $locale === 'en' ? "Are you sure you want to archive this course?" : "Bu dersi arşivlemek istediğinize emin misiniz?" ?>')) {
+            if (!confirm('<?= htmlspecialchars(t('admin.dashboard.archive_confirm')) ?>')) {
                 return;
             }
 

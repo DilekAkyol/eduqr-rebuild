@@ -32,7 +32,7 @@ final class QuestionController
 
         if ($session === null) {
             http_response_code(404);
-            echo "Session not found.";
+            echo htmlspecialchars(t('error.session_not_found'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 
@@ -53,12 +53,16 @@ final class QuestionController
             }
             $correctAnswer = $_POST['correct_answer'] ?? null;
         } elseif ($type === 'yes_no') {
-            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') ? ["Yes", "No"] : ["Evet", "Hayır"];
+            $options = [t('common.yes'), t('common.no')];
             $correctAnswer = $_POST['correct_answer'] ?? null;
         } elseif ($type === 'likert') {
-            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') 
-                ? ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
-                : ["Kesinlikle Katılmıyorum", "Katılmıyorum", "Kararsızım", "Katılıyorum", "Kesinlikle Katılıyorum"];
+            $options = [
+                t('question.likert.strongly_disagree'),
+                t('question.likert.disagree'),
+                t('question.likert.neutral'),
+                t('question.likert.agree'),
+                t('question.likert.strongly_agree')
+            ];
             $correctAnswer = null;
         }
 
@@ -83,7 +87,7 @@ final class QuestionController
 
         if ($question === null) {
             http_response_code(404);
-            echo "Question not found.";
+            echo htmlspecialchars(t('error.question_not_found'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 
@@ -110,7 +114,7 @@ final class QuestionController
 
         if ($question === null) {
             http_response_code(404);
-            echo "Question not found.";
+            echo htmlspecialchars(t('error.question_not_found'), ENT_QUOTES, 'UTF-8');
             exit;
         }
 
@@ -125,14 +129,14 @@ final class QuestionController
         header('Content-Type: application/json; charset=utf-8');
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         $sessionId = (int) $params['session_id'];
         $session = $this->sessionRepo->findById($sessionId);
         if ($session === null) {
-            echo json_encode(['success' => false, 'error' => 'Oturum bulunamadı.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.session_not_found')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -157,7 +161,7 @@ final class QuestionController
             echo json_encode([
                 'success' => true,
                 'count' => count($createdIds),
-                'message' => 'Sorular başarıyla içe aktarıldı.'
+                'message' => t('admin.session.import_success')
             ], JSON_UNESCAPED_UNICODE);
             exit;
         } catch (\InvalidArgumentException $e) {
@@ -175,14 +179,14 @@ final class QuestionController
         $hasSections = isset($body['sections']);
 
         if (!$hasQuestions && !$hasSections) {
-            throw new \InvalidArgumentException('Geçersiz JSON formatı. "questions" veya "sections" anahtarı bulunmalı.');
+            throw new \InvalidArgumentException(t('error.invalid_json_import'));
         }
 
         $result = [];
 
         if ($hasQuestions) {
             if (!is_array($body['questions'])) {
-                throw new \InvalidArgumentException('"questions" alanı bir dizi olmalıdır.');
+                throw new \InvalidArgumentException(t('error.questions_must_be_array'));
             }
             foreach ($body['questions'] as $row) {
                 if (!is_array($row)) continue;
@@ -198,7 +202,7 @@ final class QuestionController
         if ($hasSections) {
             $sections = $body['sections'];
             if (!is_array($sections)) {
-                throw new \InvalidArgumentException('"sections" alanı bir nesne olmalıdır.');
+                throw new \InvalidArgumentException(t('error.sections_must_be_array'));
             }
 
             $courseName = trim((string)($body['course_name'] ?? ''));

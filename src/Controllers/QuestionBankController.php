@@ -50,7 +50,7 @@ final class QuestionBankController
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -58,7 +58,7 @@ final class QuestionBankController
         if ($apiKey === '') {
             echo json_encode([
                 'success' => false,
-                'error'   => 'GEMINI_API_KEY .env dosyasında tanımlanmamış.'
+                'error'   => t('error.gemini_key_missing')
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -71,7 +71,7 @@ final class QuestionBankController
         $type        = trim((string)($body['type'] ?? 'multiple_choice'));
 
         if ($notes === '') {
-            echo json_encode(['success' => false, 'error' => 'Ders notları boş olamaz.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.notes_empty')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -145,7 +145,7 @@ PROMPT;
         curl_close($ch);
 
         if ($curlError !== '') {
-            echo json_encode(['success' => false, 'error' => 'API bağlantı hatası: ' . $curlError], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('admin.session.connection_error') . ': ' . $curlError], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -153,12 +153,12 @@ PROMPT;
 
         if (isset($geminiData['error'])) {
             $errMsg = $geminiData['error']['message'] ?? 'Bilinmeyen API hatası';
-            echo json_encode(['success' => false, 'error' => 'Gemini API Hatası (' . $httpStatus . '): ' . $errMsg], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.gemini_api_error', ['message' => $errMsg])], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         if ($httpStatus !== 200) {
-            echo json_encode(['success' => false, 'error' => 'Gemini API geçersiz durum kodu döndürdü (' . $httpStatus . '). Yanıt: ' . substr((string)$response, 0, 300)], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.gemini_api_error', ['message' => 'Status: ' . $httpStatus])], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -173,7 +173,7 @@ PROMPT;
         if (!isset($parsed['questions']) || !is_array($parsed['questions'])) {
             echo json_encode([
                 'success' => false,
-                'error'   => 'Gemini geçerli JSON döndürmedi. Ham yanıt: ' . substr($rawText, 0, 300)
+                'error'   => t('error.gemini_api_error', ['message' => 'Invalid JSON'])
             ], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -222,7 +222,7 @@ PROMPT;
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -243,7 +243,7 @@ PROMPT;
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -253,13 +253,13 @@ PROMPT;
         $sessionId = (int)($body['session_id'] ?? 0);
 
         if (empty($ids) || $sessionId === 0) {
-            echo json_encode(['success' => false, 'error' => 'Soru veya oturum seçilmedi.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.question_or_session_not_selected')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         $session = $this->sessionRepo->findById($sessionId);
         if ($session === null) {
-            echo json_encode(['success' => false, 'error' => 'Oturum bulunamadı.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.session_not_found')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -295,7 +295,7 @@ PROMPT;
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -308,16 +308,20 @@ PROMPT;
         $type        = trim((string)($body['type'] ?? 'multiple_choice'));
 
         if ($type === 'yes_no') {
-            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') ? ["Yes", "No"] : ["Evet", "Hayır"];
+            $options = [t('common.yes'), t('common.no')];
         } elseif ($type === 'likert') {
-            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') 
-                ? ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
-                : ["Kesinlikle Katılmıyorum", "Katılmıyorum", "Kararsızım", "Katılıyorum", "Kesinlikle Katılıyorum"];
+            $options = [
+                t('question.likert.strongly_disagree'),
+                t('question.likert.disagree'),
+                t('question.likert.neutral'),
+                t('question.likert.agree'),
+                t('question.likert.strongly_agree')
+            ];
             $correct = null;
         }
 
         if ($text === '') {
-            echo json_encode(['success' => false, 'error' => 'Soru metni boş olamaz.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.question_text_empty')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -348,13 +352,13 @@ PROMPT;
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
         // Dosya yükleme kontrolü
         if (!isset($_FILES['json_file']) || $_FILES['json_file']['error'] !== UPLOAD_ERR_OK) {
-            echo json_encode(['success' => false, 'error' => 'Dosya yüklenemedi.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.file_upload_failed')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -362,14 +366,14 @@ PROMPT;
 
         // Boyut kontrolü (maks 2MB)
         if ($file['size'] > 2 * 1024 * 1024) {
-            echo json_encode(['success' => false, 'error' => 'Dosya boyutu 2MB\'yi aşamaz.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.file_size_exceeded')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         // Uzantı kontrolü
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         if ($ext !== 'json') {
-            echo json_encode(['success' => false, 'error' => 'Sadece .json uzantılı dosyalar kabul edilir.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.file_extension_invalid')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -377,7 +381,7 @@ PROMPT;
         $data     = json_decode($contents, true);
 
         if (!is_array($data)) {
-            echo json_encode(['success' => false, 'error' => 'Geçersiz JSON formatı. Kök eleman bir dizi olmalıdır.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.json_root_must_be_array')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -440,7 +444,7 @@ PROMPT;
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
@@ -448,7 +452,7 @@ PROMPT;
         $q = $this->bankRepo->findById($id, (int)$user['id']);
 
         if ($q === null) {
-            echo json_encode(['success' => false, 'error' => 'Soru bulunamadı.']);
+            echo json_encode(['success' => false, 'error' => t('error.question_not_found')]);
             exit;
         }
 
@@ -465,14 +469,14 @@ PROMPT;
 
         $user = AuthService::user();
         if ($user === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.']);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')]);
             exit;
         }
 
         $id = (int) $params['id'];
         $q = $this->bankRepo->findById($id, (int)$user['id']);
         if ($q === null) {
-            echo json_encode(['success' => false, 'error' => 'Soru bulunamadı.']);
+            echo json_encode(['success' => false, 'error' => t('error.question_not_found')]);
             exit;
         }
 
@@ -484,7 +488,7 @@ PROMPT;
         $sourceTitle = trim((string)($input['source_title'] ?? '')) ?: null;
 
         if ($text === '') {
-            echo json_encode(['success' => false, 'error' => 'Soru metni boş olamaz.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.question_text_empty')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -499,25 +503,29 @@ PROMPT;
                 }));
             }
             if (empty($options) || count($options) < 2) {
-                echo json_encode(['success' => false, 'error' => 'Çoktan seçmeli sorular en az 2 şık içermelidir.'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['success' => false, 'error' => t('error.mc_min_options')], JSON_UNESCAPED_UNICODE);
                 exit;
             }
 
             $correctAnswer = trim((string)($input['correct_answer'] ?? ''));
             if ($correctAnswer === '') {
-                echo json_encode(['success' => false, 'error' => 'Doğru cevap belirtilmelidir.'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['success' => false, 'error' => t('error.correct_answer_required')], JSON_UNESCAPED_UNICODE);
                 exit;
             }
         } elseif ($type === 'yes_no') {
-            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') ? ["Yes", "No"] : ["Evet", "Hayır"];
+            $options = [t('common.yes'), t('common.no')];
             $correctAnswer = trim((string)($input['correct_answer'] ?? ''));
             if ($correctAnswer === '') {
                 $correctAnswer = null;
             }
         } elseif ($type === 'likert') {
-            $options = (\EduQR\I18n\I18nService::getLocale() === 'en') 
-                ? ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"]
-                : ["Kesinlikle Katılmıyorum", "Katılmıyorum", "Kararsızım", "Katılıyorum", "Kesinlikle Katılıyorum"];
+            $options = [
+                t('question.likert.strongly_disagree'),
+                t('question.likert.disagree'),
+                t('question.likert.neutral'),
+                t('question.likert.agree'),
+                t('question.likert.strongly_agree')
+            ];
             $correctAnswer = null;
         }
 
@@ -532,9 +540,9 @@ PROMPT;
         );
 
         if ($updated) {
-            echo json_encode(['success' => true, 'message' => 'Soru başarıyla güncellendi.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => true, 'message' => t('admin.session.question_updated_success')], JSON_UNESCAPED_UNICODE);
         } else {
-            echo json_encode(['success' => false, 'error' => 'Güncelleme başarısız oldu.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('admin.session.question_update_failed')], JSON_UNESCAPED_UNICODE);
         }
         exit;
     }

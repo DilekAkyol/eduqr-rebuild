@@ -412,14 +412,14 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             <a href="<?= eduqr_path('/admin/question-bank') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_qbank')) ?></a>
             <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/report#participant-list-card') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_participants')) ?></a>
             <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id']) ?>" class="nav-item-custom active"><?= htmlspecialchars(t('admin.report.live_session_nav')) ?></a>
-            <a href="<?= eduqr_path('/admin/audit-logs') ?>" class="nav-item-custom"><?= $locale === 'en' ? 'Audit Logs' : 'Denetim Kayıtları' ?></a>
+            <a href="<?= eduqr_path('/admin/audit-logs') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.audit.title')) ?></a>
             <a href="<?= eduqr_path('/admin/archive') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_archive')) ?></a>
             <a href="<?= eduqr_path('/admin/settings') ?>" class="nav-item-custom"><?= htmlspecialchars(t('admin.report.sidebar_settings')) ?></a>
         </div>
         <div class="sidebar-footer">
             <div class="profile-img">👤</div>
             <div>
-                <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? ($locale === 'en' ? 'Instructor' : 'Öğretmen')) ?></div>
+                <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? t('admin.report.sidebar_admin')) ?></div>
                 <div class="text-muted small" style="font-size: 0.75rem;"><?= htmlspecialchars(t('admin.report.sidebar_admin')) ?></div>
             </div>
         </div>
@@ -486,17 +486,17 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                         <?php if ($session['status'] !== 'closed'): ?>
                             <?php if ($session['status'] === 'active'): ?>
                                 <form id="pause-session-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/pause') ?>" method="POST" style="display:none;"><?= csrf_field() ?></form>
-                                <button class="btn btn-custom-outline" onclick="document.getElementById('pause-session-form').submit();">⏸️ <?= $locale === 'en' ? 'Pause' : 'Duraklat' ?></button>
+                                <button class="btn btn-custom-outline" onclick="document.getElementById('pause-session-form').submit();">⏸️ <?= htmlspecialchars(t('admin.session.pause')) ?></button>
                             <?php elseif ($session['status'] === 'paused'): ?>
                                 <form id="resume-session-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/resume') ?>" method="POST" style="display:none;"><?= csrf_field() ?></form>
-                                <button class="btn btn-custom-outline" onclick="document.getElementById('resume-session-form').submit();">▶️ <?= $locale === 'en' ? 'Resume' : 'Devam Ettir' ?></button>
+                                <button class="btn btn-custom-outline" onclick="document.getElementById('resume-session-form').submit();">▶️ <?= htmlspecialchars(t('admin.session.resume')) ?></button>
                             <?php endif; ?>
 
                             <form id="toggle-results-form" action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/toggle-results') ?>" method="POST" style="display:none;"><?= csrf_field() ?></form>
                             <button class="btn <?= (int)($session['show_results_to_students'] ?? 1) === 1 ? 'btn-success bg-success bg-opacity-10 text-success border-success' : 'btn-custom-outline' ?>" onclick="document.getElementById('toggle-results-form').submit();">
                                 <?= (int)($session['show_results_to_students'] ?? 1) === 1
-                                    ? '👁️ ' . ($locale === 'en' ? 'Results: Visible' : 'Sonuçlar: Açık')
-                                    : '🙈 ' . ($locale === 'en' ? 'Results: Hidden' : 'Sonuçlar: Gizli') ?>
+                                    ? '👁️ ' . htmlspecialchars(t('admin.session.results_visible'))
+                                    : '🙈 ' . htmlspecialchars(t('admin.session.results_hidden')) ?>
                             </button>
 
                             <form id="close-session-form"
@@ -557,13 +557,13 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                                                 <?php
                                                 $typeLabel = '';
                                                 if ($q['type'] === 'open_ended') {
-                                                    $typeLabel = $locale === 'en' ? 'Open-Ended' : 'Açık Uçlu';
+                                                    $typeLabel = htmlspecialchars(t('admin.qbank.type_oe'));
                                                 } elseif ($q['type'] === 'yes_no') {
-                                                    $typeLabel = $locale === 'en' ? 'Yes / No' : 'Evet / Hayır';
+                                                    $typeLabel = htmlspecialchars(t('admin.qbank.type_yn'));
                                                 } elseif ($q['type'] === 'likert') {
-                                                    $typeLabel = $locale === 'en' ? 'Likert Scale' : 'Likert Ölçeği';
+                                                    $typeLabel = htmlspecialchars(t('admin.qbank.type_likert'));
                                                 } else {
-                                                    $typeLabel = htmlspecialchars(t('admin.session.type_mc'));
+                                                    $typeLabel = htmlspecialchars(t('admin.qbank.type_mc'));
                                                 }
                                                 ?>
                                                 <span class="text-muted small"><?= $typeLabel ?></span>
@@ -642,12 +642,12 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                             <textarea class="form-control" id="question_text" name="question_text" rows="3" required placeholder="<?= htmlspecialchars(t('admin.session.question_text_placeholder')) ?>" autocomplete="off"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="question_type" class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Question Type' : 'Soru Tipi' ?></label>
+                            <label for="question_type" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.qbank.question_type')) ?></label>
                             <select class="form-select" id="question_type" name="type" onchange="toggleQuestionTypeFields()">
-                                <option value="multiple_choice" selected><?= $locale === 'en' ? 'Multiple Choice' : 'Çoktan Seçmeli' ?></option>
-                                <option value="open_ended"><?= $locale === 'en' ? 'Open-Ended' : 'Açık Uçlu' ?></option>
-                                <option value="yes_no"><?= $locale === 'en' ? 'Yes / No' : 'Evet / Hayır' ?></option>
-                                <option value="likert"><?= $locale === 'en' ? 'Likert Scale (5-point)' : 'Likert Ölçeği (5\'li)' ?></option>
+                                <option value="multiple_choice" selected><?= htmlspecialchars(t('admin.qbank.type_mc')) ?></option>
+                                <option value="open_ended"><?= htmlspecialchars(t('admin.qbank.type_oe')) ?></option>
+                                <option value="yes_no"><?= htmlspecialchars(t('admin.qbank.type_yn')) ?></option>
+                                <option value="likert"><?= htmlspecialchars(t('admin.qbank.type_likert')) ?></option>
                             </select>
                         </div>
                         
@@ -657,8 +657,8 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                                 <label class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.session.options')) ?></label>
                                 <input type="text" class="form-control mb-2 option-input" name="options[]" required placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'A'])) ?>">
                                 <input type="text" class="form-control mb-2 option-input" name="options[]" required placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'B'])) ?>">
-                                <input type="text" class="form-control mb-2 option-input" name="options[]" placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'C'])) ?> (<?= $locale === 'en' ? 'Optional' : 'İsteğe Bağlı' ?>)">
-                                <input type="text" class="form-control mb-2 option-input" name="options[]" placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'D'])) ?> (<?= $locale === 'en' ? 'Optional' : 'İsteğe Bağlı' ?>)">
+                                <input type="text" class="form-control mb-2 option-input" name="options[]" placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'C'])) ?> (<?= htmlspecialchars(t('admin.session.optional')) ?>)">
+                                <input type="text" class="form-control mb-2 option-input" name="options[]" placeholder="<?= htmlspecialchars(t('admin.session.option_placeholder', ['label' => 'D'])) ?> (<?= htmlspecialchars(t('admin.session.optional')) ?>)">
                             </div>
                         </div>
 
@@ -697,24 +697,24 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                     
                     <!-- File Upload Option -->
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Option A: Upload JSON File' : 'Seçenek A: JSON Dosyası Yükle' ?></label>
+                        <label class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.session.import_option_a')) ?></label>
                         <div class="file-drop-zone" id="modal-file-drop-zone">
                             <input type="file" id="modal-json-file" accept=".json" style="display:none;" onchange="handleModalFileSelect(this)">
                             <div class="file-drop-icon">📄</div>
-                            <div class="file-drop-text" id="modal-file-text"><?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?></div>
+                            <div class="file-drop-text" id="modal-file-text"><?= htmlspecialchars(t('admin.qbank.modal.drag_drop')) ?></div>
                         </div>
                     </div>
 
-                    <div class="text-center text-muted my-3 small fw-bold">— <?= $locale === 'en' ? 'OR' : 'VEYA' ?> —</div>
+                    <div class="text-center text-muted my-3 small fw-bold">— <?= htmlspecialchars(t('admin.session.import_or')) ?> —</div>
 
                     <!-- Textarea Option -->
                     <div class="mb-3">
-                        <label for="import-json" class="form-label text-muted small fw-semibold"><?= $locale === 'en' ? 'Option B: Paste JSON Content' : 'Seçenek B: JSON İçeriğini Yapıştır' ?></label>
+                        <label for="import-json" class="form-label text-muted small fw-semibold"><?= htmlspecialchars(t('admin.session.import_option_b')) ?></label>
                         <textarea id="import-json" class="form-control font-monospace small" rows="6" placeholder='{
   "questions": [
     {
-      "question_text": "<?= $locale === 'en' ? 'Sample Question Text?' : 'Örnek Soru Metni?' ?>",
-      "options": ["<?= $locale === 'en' ? 'A Option' : 'A Seçeneği' ?>", "<?= $locale === 'en' ? 'B Option' : 'B Seçeneği' ?>"],
+      "question_text": "<?= htmlspecialchars(t('admin.session.sample_question')) ?>",
+      "options": ["<?= htmlspecialchars(t('admin.session.sample_option_a')) ?>", "<?= htmlspecialchars(t('admin.session.sample_option_b')) ?>"],
       "correct_answer": "B"
     }
   ]
@@ -752,8 +752,9 @@ $locale = \EduQR\I18n\I18nService::getLocale();
         const translationAnswersCount = <?= json_encode(t('admin.session.answers_count')) ?>;
         const translationAlertSubmitFailed = <?= json_encode(t('admin.session.alert_submit_failed')) ?>;
         const translationAlertConnectionError = <?= json_encode(t('admin.session.alert_connection_error')) ?>;
-        const translationInvalidJson = <?= json_encode($locale === 'en' ? 'Invalid JSON format!' : 'Geçersiz JSON formatı!') ?>;
+        const translationInvalidJson = <?= json_encode(t('admin.session.invalid_json')) ?>;
         const translationCloseWarning = <?= json_encode(t('admin.session.close_warning')) ?>;
+        const translationNoResponses = <?= json_encode(t('admin.session.no_responses')) ?>;
 
         // Questions lookup mapping for results title
         const questionsLookup = {};
@@ -796,7 +797,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
 
                         resultsBarsContainer.innerHTML = '';
                         if (totalVal === 0) {
-                            resultsBarsContainer.innerHTML = `<span class="text-muted small">${locale === 'en' ? 'No responses yet.' : 'Henüz cevap yok.'}</span>`;
+                            resultsBarsContainer.innerHTML = `<span class="text-muted small">${translationNoResponses}</span>`;
                         } else {
                             let html = `<div class="row g-2">`;
                             data.results.forEach((r, idx) => {
@@ -865,7 +866,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
             if (input.files && input.files[0]) {
                 text.innerHTML = '<strong>✅ ' + escapeHtml(input.files[0].name) + '</strong>';
             } else {
-                text.textContent = '<?= $locale === 'en' ? 'Click to select or drag & drop a .json file here' : '.json dosyasını seçmek için tıklayın veya buraya sürükleyin' ?>';
+                text.textContent = <?= json_encode(t('admin.qbank.modal.drag_drop')) ?>;
             }
         }
 
@@ -880,7 +881,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                         const parsed = JSON.parse(e.target.result);
                         await sendImportPayload(parsed);
                     } catch (err) {
-                        alert("<?= $locale === 'en' ? 'Invalid JSON file content.' : 'Geçersiz JSON dosyası içeriği.' ?>");
+                        alert(<?= json_encode(t('admin.session.invalid_json_content')) ?>);
                     }
                 };
                 reader.readAsText(fileInput.files[0]);
@@ -892,7 +893,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                     alert(translationInvalidJson);
                 }
             } else {
-                alert("<?= $locale === 'en' ? 'Please select a file or paste JSON content.' : 'Lütfen bir dosya seçin veya JSON içeriği yapıştırın.' ?>");
+                alert(<?= json_encode(t('admin.session.import_select_or_paste')) ?>);
             }
         }
 
@@ -1024,17 +1025,17 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                 // A (Evet), B (Hayır)
                 const optA = document.createElement('option');
                 optA.value = 'A';
-                optA.textContent = 'A (Evet / Yes)';
+                optA.textContent = 'A (' + <?= json_encode(t('common.yes')) ?> + ')';
                 const optB = document.createElement('option');
                 optB.value = 'B';
-                optB.textContent = 'B (Hayır / No)';
+                optB.textContent = 'B (' + <?= json_encode(t('common.no')) ?> + ')';
                 correctSelect.appendChild(optA);
                 correctSelect.appendChild(optB);
                 
                 // Add none
                 const optNone = document.createElement('option');
                 optNone.value = '';
-                optNone.textContent = '<?= $locale === 'en' ? 'None' : 'Yok' ?>';
+                optNone.textContent = <?= json_encode(t('common.none')) ?>;
                 correctSelect.appendChild(optNone);
             } else { // likert, open_ended
                 optionsContainer.classList.add('d-none');

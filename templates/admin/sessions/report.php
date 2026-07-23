@@ -429,7 +429,7 @@ $participationRate = $totalPossibleAnswers > 0
         <div class="sidebar-footer">
             <div class="profile-img">👤</div>
             <div>
-                <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? ($locale === 'en' ? 'Instructor' : 'Öğretmen')) ?></div>
+                <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? t('admin.report.sidebar_admin')) ?></div>
                 <div class="text-muted small" style="font-size: 0.75rem;"><?= htmlspecialchars(t('admin.report.sidebar_admin')) ?></div>
             </div>
         </div>
@@ -443,9 +443,9 @@ $participationRate = $totalPossibleAnswers > 0
                 <a href="<?= eduqr_path('/admin/sessions/' . (int)$session['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-3"><?= htmlspecialchars(t('admin.report.back')) ?></a>
                 <?php if (!(int)($session['is_anonymized'] ?? 0)): ?>
                     <?php if (($_GET['anonymize'] ?? '') === 'true'): ?>
-                        <a href="?" class="btn btn-sm btn-primary rounded-3">🔓 <?= $locale === 'en' ? 'Show Real Names' : 'Gerçek İsimleri Göster' ?></a>
+                        <a href="?" class="btn btn-sm btn-primary rounded-3">🔓 <?= htmlspecialchars(t('admin.session.show_real_names')) ?></a>
                     <?php else: ?>
-                        <a href="?anonymize=true" class="btn btn-sm btn-outline-primary rounded-3">🔒 <?= $locale === 'en' ? 'Anonymize View' : 'Anonim Görünüm' ?></a>
+                        <a href="?anonymize=true" class="btn btn-sm btn-outline-primary rounded-3">🔒 <?= htmlspecialchars(t('admin.session.anonymize_view')) ?></a>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
@@ -532,23 +532,23 @@ $participationRate = $totalPossibleAnswers > 0
 
         <!-- Actions Card -->
         <div class="actions-card mb-4 no-print">
-            <h5><?= $locale === 'en' ? 'Actions' : 'İşlemler' ?></h5>
+            <h5><?= htmlspecialchars(t('admin.session.actions')) ?></h5>
             <div class="d-flex flex-wrap gap-2 align-items-center">
                 <!-- Anonymize Session Form -->
                 <?php if (!$session['is_anonymized']): ?>
-                <form action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/anonymize') ?>" method="POST" onsubmit="return confirm('<?= $locale === 'en' ? 'Are you sure you want to permanently anonymize this session\'s participants?' : 'Bu oturumdaki tüm katılımcı isimlerini kalıcı olarak anonimleştirmek istediğinize emin misiniz?' ?>');">
+                <form action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/anonymize') ?>" method="POST" onsubmit="return confirm('<?= htmlspecialchars(t('admin.session.anonymize_confirm')) ?>');">
     <?= csrf_field() ?>
                     <button type="submit" class="btn-anonymize-session">
-                        <?= $locale === 'en' ? 'Anonymize Session' : 'Oturumu Anonimleştir' ?>
+                        <?= htmlspecialchars(t('admin.session.anonymize_btn')) ?>
                     </button>
                 </form>
                 <?php endif; ?>
 
                 <!-- Delete Session Form -->
-                <form action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/delete') ?>" method="POST" onsubmit="return confirm('<?= $locale === 'en' ? 'Are you sure you want to permanently delete this session and all its data?' : 'Bu oturumu ve tüm verilerini kalıcı olarak silmek istediğinize emin misiniz?' ?>');">
+                <form action="<?= eduqr_path('/admin/sessions/' . (int)$session['id'] . '/delete') ?>" method="POST" onsubmit="return confirm('<?= htmlspecialchars(t('admin.session.delete_confirm')) ?>');">
     <?= csrf_field() ?>
                     <button type="submit" class="btn-delete-session">
-                        <?= $locale === 'en' ? 'Delete Session' : 'Oturumu Sil' ?>
+                        <?= htmlspecialchars(t('admin.session.delete_btn')) ?>
                     </button>
                 </form>
             </div>
@@ -571,13 +571,13 @@ $participationRate = $totalPossibleAnswers > 0
                                     <?php
                                     $typeLabel = '';
                                     if ($q['type'] === 'open_ended') {
-                                        $typeLabel = $locale === 'en' ? 'Open-Ended' : 'Açık Uçlu';
+                                        $typeLabel = htmlspecialchars(t('admin.qbank.type_oe'));
                                     } elseif ($q['type'] === 'yes_no') {
-                                        $typeLabel = $locale === 'en' ? 'Yes / No' : 'Evet / Hayır';
+                                        $typeLabel = htmlspecialchars(t('admin.qbank.type_yn'));
                                     } elseif ($q['type'] === 'likert') {
-                                        $typeLabel = $locale === 'en' ? 'Likert Scale' : 'Likert Ölçeği';
+                                        $typeLabel = htmlspecialchars(t('admin.qbank.type_likert'));
                                     } else {
-                                        $typeLabel = htmlspecialchars(t('admin.session.type_mc'));
+                                        $typeLabel = htmlspecialchars(t('admin.qbank.type_mc'));
                                     }
                                     ?>
                                     <span class="text-muted small"><?= $typeLabel ?></span>
@@ -588,12 +588,12 @@ $participationRate = $totalPossibleAnswers > 0
                                     <?php $answers = $results[$q['id']] ?? []; ?>
                                     <div class="d-flex flex-column gap-2 mt-3">
                                         <?php if (empty($answers)): ?>
-                                            <span class="text-muted small"><?= $locale === 'en' ? 'No responses yet.' : 'Henüz cevap yok.' ?></span>
+                                            <span class="text-muted small"><?= htmlspecialchars(t('admin.session.no_responses')) ?></span>
                                         <?php else: ?>
                                             <?php foreach ($answers as $idx => $ans): ?>
                                                 <div class="p-3 rounded-3 border small" style="background: var(--list-item-bg); border: 1px solid var(--list-item-border) !important;">
                                                     <div class="d-flex justify-content-between align-items-center mb-1 text-muted extra-small" style="font-size: 0.75rem;">
-                                                        <span class="fw-semibold"><?= $locale === 'en' ? 'Response' : 'Cevap' ?> #<?= $idx + 1 ?></span>
+                                                        <span class="fw-semibold"><?= htmlspecialchars(t('admin.session.response_label')) ?> #<?= $idx + 1 ?></span>
                                                         <span><?= date('H:i', strtotime($ans['created_at'])) ?></span>
                                                     </div>
                                                     <div class="fw-medium text-main" style="word-break: break-word;"><?= htmlspecialchars($ans['answer_value']) ?></div>
@@ -650,12 +650,12 @@ $participationRate = $totalPossibleAnswers > 0
                 <div class="card-custom mb-4" id="ai-analysis-card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(59, 130, 246, 0.04) 100%); border: 1.5px solid rgba(139, 92, 246, 0.15) !important;">
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <span style="font-size: 1.5rem;">🤖</span>
-                        <h4 class="fw-bold mb-0" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.1rem;"><?= $locale === 'en' ? 'AI Performance Analysis' : 'Yapay Zeka Hata & Analizi' ?></h4>
+                        <h4 class="fw-bold mb-0" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.1rem;"><?= htmlspecialchars(t('admin.session.ai_analysis_title')) ?></h4>
                     </div>
                     
                     <div id="ai-analysis-content" class="small text-muted lh-base mb-3">
                         <?php if (empty($session['ai_analysis'])): ?>
-                            <p class="mb-0"><?= $locale === 'en' ? 'No analysis has been generated for this session yet. Let Gemini analyze student performance, find common mistakes, and recommend learning outcomes!' : 'Bu oturum için henüz yapay zeka analizi üretilmemiş. Gemini ile öğrenci performansını, yapılan ortak hataları ve pedagojik kazanımları analiz edin!' ?></p>
+                            <p class="mb-0"><?= htmlspecialchars(t('admin.session.ai_analysis_none')) ?></p>
                         <?php else: ?>
                             <div id="ai-markdown-rendered">
                                 <!-- Markdown content will be rendered here on load -->
@@ -667,7 +667,7 @@ $participationRate = $totalPossibleAnswers > 0
                     <div class="no-print">
                         <button type="button" id="btn-generate-ai" onclick="generateAiAnalysis()" class="btn btn-sm text-white w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%); border: none; border-radius: 10px; font-weight: 600;">
                             <span id="ai-btn-icon">✨</span>
-                            <span id="ai-btn-label"><?= empty($session['ai_analysis']) ? ($locale === 'en' ? 'Generate AI Analysis' : 'Yapay Zeka Analizi Üret') : ($locale === 'en' ? 'Regenerate Analysis' : 'Analizi Yenile') ?></span>
+                            <span id="ai-btn-label"><?= empty($session['ai_analysis']) ? htmlspecialchars(t('admin.session.ai_analysis_generate')) : htmlspecialchars(t('admin.session.ai_analysis_regenerate')) ?></span>
                         </button>
                     </div>
                 </div>
@@ -768,7 +768,7 @@ $participationRate = $totalPossibleAnswers > 0
 
             btn.disabled = true;
             icon.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
-            label.textContent = '<?= $locale === 'en' ? 'Analyzing...' : 'Analiz ediliyor...' ?>';
+            label.textContent = <?= json_encode(t('admin.session.ai_analyzing')) ?>;
 
             try {
                 const res = await fetch(<?= json_encode(eduqr_path('/admin/sessions/' . $session['id'] . '/ai-analysis')) ?>, {
@@ -779,12 +779,12 @@ $participationRate = $totalPossibleAnswers > 0
                     const contentDiv = document.getElementById('ai-analysis-content');
                     contentDiv.innerHTML = `<div id="ai-markdown-rendered"></div>`;
                     document.getElementById('ai-markdown-rendered').innerHTML = marked.parse(data.analysis);
-                    label.textContent = '<?= $locale === 'en' ? 'Regenerate Analysis' : 'Analizi Yenile' ?>';
+                    label.textContent = <?= json_encode(t('admin.session.ai_analysis_regenerate')) ?>;
                 } else {
-                    alert("Error: " + (data.error || "<?= $locale === 'en' ? 'Analysis failed.' : 'Analiz başarısız.' ?>"));
+                    alert("Error: " + (data.error || <?= json_encode(t('admin.session.ai_failed')) ?>));
                 }
             } catch (e) {
-                alert("<?= $locale === 'en' ? 'Connection error.' : 'Bağlantı hatası.' ?>");
+                alert(<?= json_encode(t('admin.session.connection_error')) ?>);
             } finally {
                 btn.disabled = false;
                 icon.innerHTML = '✨';

@@ -3,6 +3,7 @@ use EduQR\Services\AuthService;
 use EduQR\Repositories\CourseRepository;
 
 $locale = \EduQR\I18n\I18nService::getLocale();
+$archive = t('admin.report.sidebar_archive');
 ?>
 <!DOCTYPE html>
 <html lang="<?= $locale ?>">
@@ -281,7 +282,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
     <div class="sidebar-footer">
         <div class="profile-img">👤</div>
         <div>
-            <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? ($locale === 'en' ? 'Instructor' : 'Öğretmen')) ?></div>
+            <div class="small fw-bold text-white"><?= htmlspecialchars($user['name'] ?? t('admin.report.sidebar_admin')) ?></div>
             <div class="text-muted small" style="font-size: 0.75rem;"><?= htmlspecialchars(t('admin.report.sidebar_admin')) ?></div>
         </div>
     </div>
@@ -305,13 +306,13 @@ $locale = \EduQR\I18n\I18nService::getLocale();
 
     <div class="page-content">
         <h1 class="page-title"><?= htmlspecialchars($archive) ?></h1>
-        <p class="page-desc"><?= $locale === 'en' ? 'View and restore archived courses.' : 'Arşivlenmiş derslerinizi görüntüleyin.' ?></p>
+        <p class="page-desc"><?= htmlspecialchars(t('admin.archive.desc')) ?></p>
 
         <div class="archive-card">
             <?php if (empty($archivedCourses)): ?>
                 <div class="empty-state">
                     <div class="empty-icon">📦</div>
-                    <p><?= $locale === 'en' ? 'No archived courses yet.' : 'Henüz arşivlenmiş ders yok.' ?></p>
+                    <p><?= htmlspecialchars(t('admin.archive.empty')) ?></p>
                 </div>
             <?php else: ?>
                 <?php foreach ($archivedCourses as $course): ?>
@@ -321,7 +322,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
                             <div class="item-code"><?= htmlspecialchars($course['code']) ?></div>
                         </div>
                         <button class="btn btn-sm btn-outline-primary rounded-3" onclick="restoreCourse(<?= $course['id'] ?>)">
-                            <?= $locale === 'en' ? 'Restore' : 'Geri Yükle' ?>
+                            <?= htmlspecialchars(t('admin.archive.restore')) ?>
                         </button>
                     </div>
                 <?php endforeach; ?>
@@ -349,7 +350,7 @@ $locale = \EduQR\I18n\I18nService::getLocale();
     }
 
     async function restoreCourse(id) {
-        if (!confirm('<?= $locale === 'en' ? "Are you sure you want to restore this course?" : "Bu dersi geri yüklemek istediğinize emin misiniz?" ?>')) {
+        if (!confirm('<?= htmlspecialchars(t('admin.archive.restore_confirm')) ?>')) {
             return;
         }
         

@@ -84,7 +84,7 @@ final class PublicQuestionController
         $participantId = (int)($_COOKIE['eduqr_participant'] ?? 0);
         $participant = $this->participantRepo->findById($participantId);
         if ($participant === null) {
-            echo json_encode(['success' => false, 'error' => 'Yetkisiz erişim.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.unauthorized')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -94,23 +94,23 @@ final class PublicQuestionController
 
         $question = $this->questionRepo->findById($questionId);
         if ($question === null || $question['status'] !== 'active' || (int)$question['session_id'] !== (int)$participant['session_id']) {
-            echo json_encode(['success' => false, 'error' => 'Soru aktif değil veya bulunamadı.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.question_not_active_or_found')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         // Oturum durumunu kontrol et (Kapalı veya Duraklatılmış oturumlar cevap kabul etmez)
         $session = $this->sessionRepo->findById((int)$question['session_id']);
         if ($session === null || $session['status'] === 'closed') {
-            echo json_encode(['success' => false, 'error' => 'Oturum sonlandırılmış.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('student.join.session_closed_desc')], JSON_UNESCAPED_UNICODE);
             exit;
         }
         if ($session['status'] === 'paused') {
-            echo json_encode(['success' => false, 'error' => 'Oturum geçici olarak duraklatılmıştır.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('student.join.session_paused_desc')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         if ($value === '') {
-            echo json_encode(['success' => false, 'error' => 'Geçersiz cevap.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => false, 'error' => t('error.invalid_answer')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
